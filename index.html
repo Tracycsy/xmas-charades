@@ -39,12 +39,12 @@ h1 em{font-style:normal;color:var(--gold-s)}
 .ib svg{width:20px;height:20px}
 :focus-visible{outline:3px solid var(--gold-s);outline-offset:3px}
 kbd{font:800 12px var(--sans);padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.15)}
-.ribbon{display:flex;align-items:center;gap:14px;padding:14px 22px;border-radius:16px;background:linear-gradient(90deg,rgba(78,7,11,.55),rgba(78,7,11,.25));border:1px solid var(--line);font-size:clamp(18px,1.6vw,24px);font-weight:800}
+.ribbon{display:flex;flex-wrap:wrap;align-items:center;gap:14px;min-height:72px;padding:14px 22px;border-radius:16px;background:linear-gradient(90deg,rgba(78,7,11,.55),rgba(78,7,11,.25));border:1px solid var(--line);font-size:clamp(18px,1.6vw,24px);font-weight:800}
 .ribbon b{color:var(--gold-s)}
 .ribbon svg{width:30px;height:30px;flex:none;color:var(--gold-s)}
 /* team cards = gift tags */
-.teams{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:clamp(14px,1.6vw,26px);align-items:stretch}
-.tag{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:clamp(18px,2vw,28px);padding-top:clamp(118px,15vh,140px);border-radius:26px;background:linear-gradient(180deg,var(--ivory),var(--champ));color:var(--ink);box-shadow:0 14px 0 rgba(78,7,11,.35),0 30px 60px rgba(0,0,0,.3);min-height:clamp(300px,52vh,560px);animation:rise .6s var(--ease) both}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:clamp(14px,1.6vw,26px);align-items:stretch}
+.tag{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:clamp(18px,2vw,28px);padding-top:clamp(118px,15vh,140px);border-radius:26px;background:linear-gradient(180deg,var(--ivory),var(--champ));color:var(--ink);box-shadow:0 14px 0 rgba(78,7,11,.35),0 30px 60px rgba(0,0,0,.3);min-height:clamp(280px,44vh,520px);animation:rise .6s var(--ease) both}
 .tag:nth-child(2){animation-delay:.08s}.tag:nth-child(3){animation-delay:.16s}.tag:nth-child(4){animation-delay:.24s}
 @keyframes rise{from{opacity:0;transform:translateY(24px) scale(.97)}}
 .tag.lead{box-shadow:0 0 0 4px var(--gold),0 14px 0 rgba(78,7,11,.35),0 30px 70px rgba(212,175,55,.45)}
@@ -209,9 +209,8 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
       <button class="ib" data-go="setup" aria-label="Setup"><svg><use href="#i-set"/></svg>Setup</button>
     </div>
   </div>
-  <div class="ribbon" id="status" role="status"></div>
+  <div class="ribbon"><div id="status" role="status" style="display:flex;align-items:center;gap:14px;flex:1"></div><div id="boardActions"></div></div>
   <div class="teams" id="teams"></div>
-  <div class="actions" id="boardActions"></div>
 </section>
 
 <section class="screen" id="ready">
@@ -323,8 +322,19 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
   </div>
   <div class="sheet">
     <div class="scroll"><table class="sct" id="hTable"></table></div>
-    <p class="note">Tap a box to tick an item for that team. Tie on points? The team whose basket reached the podium first wins.</p>
+    <p class="note">Tap a box to tick an item for that team. Tie on points? Rock, paper, scissors decides.</p>
     <div class="tools"><button class="btn ghost-l" data-go="hclear" data-confirm="Click again to clear all ticks">Clear all ticks</button></div>
+  </div>
+</section>
+
+<section class="screen" id="tie">
+  <div class="center">
+    <p class="kicker">It's a tie!</p>
+    <div class="big-name" id="tNames" style="font-size:clamp(44px,6vw,96px)"></div>
+    <div class="up">Rock, paper, scissors</div>
+    <p class="sub">Team captains to the front. Best of three. Then tap the team that won.</p>
+    <div class="actions" id="tBtns"></div>
+    <button class="btn ghost-l" data-go="tieback">Back</button>
   </div>
 </section>
 
@@ -341,11 +351,9 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
     <div class="grid">
       <label>Round length (seconds)<input type="number" id="sSecs" min="30" max="600" step="10"></label>
       <label>Passes allowed (0 = unlimited)<input type="number" id="sPass" min="0" max="20"></label>
-      <label>Tie-break length (seconds)<input type="number" id="sTb" min="20" max="300" step="10"></label>
     </div>
     <div class="two">
       <label>Words: one per line as Category | Word, 1 or 2 words each. "Famous faces" are mixed into every team's set. Lines starting with # are ignored.<textarea id="sWords" spellcheck="false"></textarea></label>
-      <label>Tie-break words (kept apart so nobody has seen them)<textarea id="sTbW" spellcheck="false"></textarea></label>
     </div>
     <p class="note" id="sCount"></p>
     <h2 class="setup-h">Scavenger hunt</h2>
@@ -529,40 +537,31 @@ function verdict(){
   const played=all.filter(x=>x.r).length;
   if(played<all.length)return{state:'playing',played};
   const top=Math.max(...all.map(x=>x.r.c.length));
-  let tied=all.filter(x=>x.r.c.length===top);
+  const tied=all.filter(x=>x.r.c.length===top);
   if(tied.length===1)return{state:'win',w:tied[0],how:''};
-  if(tied.some(x=>!x.t))return{state:'tie',tied};
-  const tbTop=Math.max(...tied.map(x=>x.t.c.length));
-  tied=tied.filter(x=>x.t.c.length===tbTop);
-  if(tied.length===1)return{state:'win',w:tied[0],how:'Won on the tie-break'};
-  const minP=Math.min(...tied.map(passes));
-  tied=tied.filter(x=>passes(x)===minP);
-  if(tied.length===1)return{state:'win',w:tied[0],how:'Level after the tie-break, won on fewer passed words'};
-  return{state:'coin',tied};
+  return{state:'tie',tied};
 }
 const list=a=>a.map(x=>esc(x.n)).join(' and ');
 const ico=(id)=>`<svg><use href="#i-${id}"/></svg>`;
 function renderBoard(){
   const v=verdict();
   const top=Math.max(0,...S.res.map(r=>r?r.c.length:0));
-  const tiedIdx=v.state==='tie'?v.tied.map(x=>x.i):[];
   $('teams').innerHTML=S.names.map((n,i)=>{
     const r=S.res[i],t=S.tb[i],lead=r&&r.c.length===top&&top>0;
     const btn=!r?`<button class="btn red wide" data-go="play" data-i="${i}">${ico('play')}Play ${esc(n)}</button>`
-      :tiedIdx.includes(i)&&!t?`<button class="btn gold wide" data-go="tb" data-i="${i}">${ico('star')}Play tie-break</button>`
       :`<button class="btn ghost wide" data-go="replay" data-i="${i}" data-confirm="Click again to replay">Replay</button>`;
     return `<article class="tag${lead?' lead':''}"><img class="hang" src="${baubleSrc(COLORS[i%4])}" alt="">
       ${lead?`<span class="badge">${ico('crown')}Leading</span>`:''}
       <h2>${esc(n)}</h2>
       ${r?`<div class="score">${r.c.length}</div><div class="unit">correct</div><div class="meter"><i style="width:${top?Math.round(r.c.length/top*100):0}%"></i></div>`:`<div class="score idle">Ready to play</div>`}
-      <div class="meta">${r?`${r.p.length} passed`:''}${t?` · Tie-break <b>${t.c.length}</b>`:''}</div>
+      <div class="meta">${r?`${r.p.length} passed`:''}</div>
       <div class="act">${btn}</div></article>`}).join('');
   const st=$('status');const star=`<svg><use href="#i-star"/></svg>`;
   if(v.state==='playing')st.innerHTML=`${star}<span><b>${v.played} of ${S.names.length}</b> teams have played. Each team gets ${fmt(S.secs)} on the clock.</span>`;
-  else if(v.state==='tie')st.innerHTML=`${star}<span>It's a tie between <b>${list(v.tied)}</b>! Each plays a ${S.tbSecs}-second tie-break with fresh words.</span>`;
-  else if(v.state==='coin')st.innerHTML=`${star}<span>Still level between <b>${list(v.tied)}</b> after the tie-break and passes. Xinfa tosses a coin!</span>`;
+  else if(v.state==='tie')st.innerHTML=`${star}<span>It's a tie between <b>${list(v.tied)}</b>! Rock, paper, scissors decides.</span>`;
   else st.innerHTML=`${star}<span>All teams have played. <b>We have a winner!</b></span>`;
-  $('boardActions').innerHTML=v.state==='win'?`<button class="btn gold xl" style="flex:none" data-go="reveal">${ico('crown')}Reveal the winner</button>`:'';
+  $('boardActions').innerHTML=v.state==='win'?`<button class="btn gold" data-go="reveal">${ico('crown')}Reveal the winner</button>`
+    :v.state==='tie'?`<button class="btn gold" data-go="ctie">${ico('star')}Rock, paper, scissors</button>`:'';
 }
 
 /* round: every third card is a famous face while any are left */
@@ -686,29 +685,37 @@ function renderScore(){
   $('hTable').innerHTML=h;
 }
 function hReveal(){
-  const tots=S.names.map((n,i)=>hTotal(i)),top=Math.max(...tots),w=S.names.filter((n,i)=>tots[i]===top);
-  $('wKick').textContent='And the scavenger hunt champion is…';
-  $('wTeam').textContent=w.join(' & ');$('wScore').textContent=`${top} points`;
-  $('wHow').textContent=w.length>1?'Tied on points: the team whose basket reached the podium first wins':'';
-  confetti();show('winner');
+  const tots=S.names.map((n,i)=>hTotal(i)),top=Math.max(...tots),w=S.names.map((n,i)=>i).filter(i=>tots[i]===top);
+  if(w.length>1){showTie('h',w);return}
+  crown('h',w[0],'');
 }
+
+/* ties: rock, paper, scissors */
+let TIE=null;
+function showTie(g,idx){TIE={g,idx};$('tNames').textContent=idx.map(i=>S.names[i]).join(' vs ');
+  $('tBtns').innerHTML=idx.map(i=>`<button class="btn gold" data-go="rps" data-i="${i}"><img src="${baubleSrc(COLORS[i%4])}" alt="" style="width:26px">${esc(S.names[i])} won</button>`).join('');show('tie')}
+function crown(g,i,how){
+  $('wKick').textContent=g==='h'?'And the scavenger hunt champion is…':'And the charades champion is…';
+  $('wTeam').textContent=S.names[i];
+  $('wScore').textContent=g==='h'?`${hTotal(i)} points`:`${S.res[i].c.length} correct`;
+  $('wHow').textContent=how;confetti();show('winner')}
 
 /* setup */
 let back='board';
 function openSetup(){back=cur==='hunt'||cur==='hscore'?'hunt':'board';
   $('names').innerHTML=S.names.map((n,i)=>`<label>Table ${i+1} team name<input id="sN${i}" value="${esc(n)}"></label>`).join('');
-  $('sSecs').value=S.secs;$('sPass').value=S.passLimit;$('sTb').value=S.tbSecs;
-  $('sWords').value=S.words;$('sTbW').value=S.tbWords;
+  $('sSecs').value=S.secs;$('sPass').value=S.passLimit;
+  $('sWords').value=S.words;
   $('sHMin').value=S.hMin;$('sHLate').value=S.hLate;$('sHunt').value=S.hunt;count();show('setup');
 }
 function count(){const n=parse($('sWords').value).length,u=parse($('sWords').value).filter(x=>S.used.includes(x.w)).length;
-  const long=parse($('sWords').value+'\n'+$('sTbW').value).filter(x=>x.w.split(/\s+/).length>2).map(x=>x.w);
-  $('sCount').textContent=`${n} words (${u} already used), ${parse($('sTbW').value).length} tie-break words. Four 3-minute rounds use roughly 50 to 70 words.`+(long.length?` Longer than 2 words: ${long.join(', ')}.`:'')}
+  const long=parse($('sWords').value).filter(x=>x.w.split(/\s+/).length>2).map(x=>x.w);
+  $('sCount').textContent=`${n} words (${u} already used). Four 3-minute rounds use roughly 50 to 70 words.`+(long.length?` Longer than 2 words: ${long.join(', ')}.`:'')}
 function saveSetup(){
   S.names=S.names.map((n,i)=>($('sN'+i).value.trim()||n));
   const num=(id,d,lo,hi)=>{const v=parseInt($(id).value,10);return isNaN(v)?d:Math.min(hi,Math.max(lo,v))};
-  S.secs=num('sSecs',180,30,600);S.passLimit=num('sPass',3,0,20);S.tbSecs=num('sTb',60,20,300);
-  S.words=$('sWords').value;S.tbWords=$('sTbW').value;
+  S.secs=num('sSecs',180,30,600);S.passLimit=num('sPass',3,0,20);
+  S.words=$('sWords').value;
   const hm=num('sHMin',10,1,30);if(hm!==S.hMin&&!HT.run){S.hMin=hm;HT.left=null}S.hLate=num('sHLate',3,0,20);
   if($('sHunt').value!==S.hunt){S.hunt=$('sHunt').value;S.hs=[[],[],[],[]];S.hl=[false,false,false,false]}
   save();if(back==='hunt'){renderHunt();show('hunt')}else{renderBoard();show('board')}
@@ -722,7 +729,9 @@ document.addEventListener('click',e=>{
   if(b.dataset.confirm&&!armed.get(b)){const old=b.innerHTML;armed.set(b,true);b.textContent=b.dataset.confirm;setTimeout(()=>{armed.delete(b);if(b.isConnected)b.innerHTML=old},3000);return}
   const go=b.dataset.go,i=+b.dataset.i;
   if(go==='play')prepare(i,false);
-  else if(go==='tb')prepare(i,true);
+  else if(go==='ctie'){const v=verdict();if(v.state==='tie')showTie('c',v.tied.map(x=>x.i))}
+  else if(go==='rps'){if(TIE)crown(TIE.g,i,'Won on rock, paper, scissors')}
+  else if(go==='tieback'){if(TIE&&TIE.g==='h'){renderHunt();show('hunt')}else{renderBoard();show('board')}}
   else if(go==='replay'){S.res[i]=null;S.tb[i]=null;save();prepare(i,false)}
   else if(go==='begin')begin();
   else if(go==='correct')act('c');
@@ -749,7 +758,7 @@ document.addEventListener('click',e=>{
   else if(go==='hreveal')hReveal();
 });
 $('pAbort').dataset.confirm='Click again to cancel (no score saved)';
-document.addEventListener('input',e=>{if(e.target.id==='sWords'||e.target.id==='sTbW')count()});
+document.addEventListener('input',e=>{if(e.target.id==='sWords')count()});
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,textarea')||e.repeat)return;
   const k=e.key.length===1?e.key.toLowerCase():e.key;
@@ -768,7 +777,7 @@ document.addEventListener('keydown',e=>{
 function reveal(){
   const v=verdict();if(v.state!=='win')return;
   const r=v.w.r;$('wTeam').textContent=v.w.n;
-  $('wScore').textContent=`${r.c.length} correct`+(v.w.t?` · tie-break ${v.w.t.c.length}`:'');
+  $('wScore').textContent=`${r.c.length} correct`;
   $('wHow').textContent=v.how;$('wKick').textContent='And the charades champion is…';
   confetti();show('winner');
 }
