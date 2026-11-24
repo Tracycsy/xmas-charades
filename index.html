@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Christmas Charades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: loud party-host energy, readable from the back of a function room
+   IDEA: a Christmas stage marquee, gold lettering on evergreen felt
+   PICTURE: the live word card and the countdown, huge, centre stage
+   COLOUR and TYPE: evergreen field, gold support, berry red accent; Lilita One for display, Nunito for text
+   LAYOUT: one screen per game state; top bar, giant card, big buttons along the bottom */
+:root{color-scheme:dark;--bg:#0d3a2c;--bg2:#08261d;--ink:#fff8ea;--mute:#b9d1c4;--gold:#f3c34d;--red:#e5483f;--ok:#3fbf6f;--card:#fff8ea;--cardink:#13241e;--line:rgba(255,248,234,.18)}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font:17px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip;
+ background:radial-gradient(2px 2px at 20% 30%,rgba(255,255,255,.35) 50%,transparent 51%) 0 0/140px 140px,
+ radial-gradient(1.5px 1.5px at 70% 80%,rgba(255,255,255,.25) 50%,transparent 51%) 0 0/110px 110px,
+ radial-gradient(120% 90% at 50% 0%,#17573f 0%,var(--bg) 45%,var(--bg2) 100%) fixed}
+.d{font-family:"Lilita One",Nunito,system-ui,sans-serif;font-weight:400;letter-spacing:.01em}
+.screen{display:none;min-height:100vh;padding:clamp(16px,3vw,40px) max(4vw,16px);flex-direction:column;gap:clamp(14px,2vw,24px)}
+.screen.on{display:flex}
+h1{margin:0;font-size:clamp(32px,5vw,52px);line-height:1.05;text-wrap:balance;color:var(--gold)}
+h2{margin:0;font-size:clamp(22px,3vw,30px);line-height:1.1}
+p{margin:0}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{min-height:48px;padding:0 20px;border-radius:14px;border:2px solid transparent;font:800 17px/1 Nunito,system-ui,sans-serif;cursor:pointer;color:var(--cardink);background:var(--gold);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--gold)}
+.btn.ok{background:var(--ok);color:#06210f}
+.btn.bad{background:#40564d;color:var(--ink)}
+.btn.red{background:var(--red);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.big{min-height:72px;font-size:clamp(20px,2.4vw,28px);padding:0 30px;flex:1}
+kbd{font:700 13px Nunito,sans-serif;padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.18)}
+.note{color:var(--mute);font-size:15px}
+.status{font-size:clamp(17px,2vw,22px);font-weight:700;padding:14px 18px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid var(--line)}
+.status b{color:var(--gold)}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px}
+.tc{background:rgba(0,0,0,.24);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.tc.lead{border-color:var(--gold);box-shadow:0 0 0 2px rgba(243,195,77,.25) inset}
+.tc header{display:flex;align-items:center;gap:12px}
+.tc .pts{font-size:clamp(56px,7vw,88px);line-height:.9;color:var(--ink)}
+.tc .pts small{font:700 16px Nunito,sans-serif;color:var(--mute);margin-left:6px}
+.tc .meta{color:var(--mute);font-size:15px}
+.tc .btn{margin-top:auto}
+.bauble{width:42px;height:48px;flex:none}
+/* ready */
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px}
+.center .name{font-size:clamp(52px,10vw,130px);line-height:1;color:var(--gold);text-wrap:balance}
+.rules{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:clamp(17px,2vw,22px);max-width:760px;text-align:left}
+.rules li{padding-left:34px;position:relative}
+.rules li::before{content:"";position:absolute;left:6px;top:.55em;width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px rgba(229,72,63,.25)}
+.warn{color:var(--gold);font-weight:800}
+/* play */
+.bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.bar .tn{font-size:clamp(22px,3vw,36px);color:var(--gold)}
+.clock{font-size:clamp(64px,11vw,150px);line-height:.9;font-variant-numeric:tabular-nums;text-align:center}
+.clock.low{color:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.sc{justify-self:end;text-align:right}
+.sc .n{font-size:clamp(48px,7vw,96px);line-height:.9;color:var(--ok)}
+.sc small{display:block;color:var(--mute);font-weight:700}
+.prog{height:10px;border-radius:9px;background:rgba(0,0,0,.3);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--gold);transition:width .2s linear}
+.prog.low i{background:var(--red)}
+.stage{flex:1;display:flex;align-items:center;justify-content:center}
+.card{position:relative;width:min(1150px,100%);min-height:clamp(220px,40vh,460px);background:var(--card);color:var(--cardink);border-radius:28px;padding:clamp(24px,4vw,56px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;box-shadow:0 18px 0 rgba(0,0,0,.25),0 30px 60px rgba(0,0,0,.35)}
+.card.pop{animation:pop .28s ease-out}
+@keyframes pop{from{transform:scale(.94) rotate(-1deg);opacity:.4}}
+.cat{font-weight:800;font-size:clamp(15px,1.8vw,22px);color:#fff;background:var(--red);padding:6px 16px;border-radius:99px}
+.word{line-height:1.02;text-wrap:balance;overflow-wrap:anywhere}
+.w1{font-size:clamp(54px,10vw,150px)}.w2{font-size:clamp(44px,7.5vw,112px)}.w3{font-size:clamp(36px,5.6vw,84px)}
+.paused{position:absolute;inset:0;border-radius:28px;background:rgba(8,38,29,.92);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:clamp(40px,7vw,90px)}
+.paused[hidden]{display:none}
+.ctrl{display:flex;flex-wrap:wrap;gap:12px}
+.ctrl .small{flex:none}
+.help{color:var(--mute);font-size:14px;text-align:center}
+/* done */
+.big-n{font-size:clamp(120px,22vw,300px);line-height:.85;color:var(--ok)}
+.up{color:var(--red);font-size:clamp(44px,8vw,100px);line-height:1}
+.lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;width:min(1000px,100%);text-align:left}
+.lists h3{margin:0 0 8px;font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:700 15px Nunito,sans-serif;border-radius:99px;padding:7px 14px;cursor:pointer;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);min-height:36px}
+.chip.c{background:rgba(63,191,111,.2);border-color:rgba(63,191,111,.5)}
+/* winner */
+.win .name{font-size:clamp(60px,12vw,170px)}
+.conf{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.conf i{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+/* setup */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:700}
+input,textarea{font:16px/1.4 Nunito,system-ui,sans-serif;color:var(--cardink);background:var(--card);border:2px solid transparent;border-radius:12px;padding:10px 12px;min-height:46px}
+input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+textarea{min-height:280px;resize:vertical;font-size:15px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px}
+@media(max-width:600px){.bar{grid-template-columns:1fr 1fr}.clock{grid-column:1/-1;order:-1}.btn.big{min-height:60px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<section class="screen on" id="board">
+  <div class="top">
+    <div>
+      <h1 class="d">Christmas Charades</h1>
+      <p class="note">GIO and GTO Christmas Party · 4 December 2026</p>
+    </div>
+    <div class="row">
+      <button class="btn ghost" data-go="fs">Full screen <kbd>F</kbd></button>
+      <button class="btn ghost" id="mute" data-go="mute">Sound on</button>
+      <button class="btn ghost" data-go="setup">Setup</button>
+    </div>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="teams" id="teams"></div>
+  <div class="row" id="boardActions"></div>
+</section>
+
+<section class="screen" id="ready">
+  <div class="center">
+    <p class="note" id="rKind"></p>
+    <div class="name d" id="rTeam"></div>
+    <ul class="rules">
+      <li>Guessers sit with their backs to the screen. Actors face it.</li>
+      <li>Actors can talk and act, but can't say any word on the screen.</li>
+      <li>No spelling, no letters, no "it starts with C".</li>
+      <li>If the answer is a person, no pointing at them.</li>
+      <li id="rPass"></li>
+    </ul>
+    <p class="warn" id="rWarn"></p>
+    <div class="row">
+      <button class="btn big" data-go="begin" style="flex:none">Start the clock <kbd>Space</kbd></button>
+      <button class="btn ghost" data-go="board">Back</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="play">
+  <div class="bar">
+    <div class="tn d" id="pTeam"></div>
+    <div class="clock d" id="pTime">3:00</div>
+    <div class="sc"><span class="n d" id="pScore">0</span><small>correct</small></div>
+  </div>
+  <div class="prog" id="pBar"><i id="pProg" style="width:100%"></i></div>
+  <div class="stage">
+    <div class="card" id="pCard">
+      <span class="cat" id="pCat"></span>
+      <div class="word d w1" id="pWord"></div>
+      <div class="paused d" id="pPaused" hidden>Paused</div>
+    </div>
+  </div>
+  <div class="ctrl">
+    <button class="btn big bad" data-go="pass" id="pPass">Pass <kbd>←</kbd></button>
+    <button class="btn big ok" data-go="correct">Correct <kbd>→</kbd></button>
+  </div>
+  <div class="row" style="justify-content:center">
+    <button class="btn ghost small" data-go="undo">Undo <kbd>Z</kbd></button>
+    <button class="btn ghost small" data-go="pause" id="pPauseBtn">Pause <kbd>P</kbd></button>
+    <button class="btn ghost small" data-go="abort" id="pAbort">Cancel round</button>
+  </div>
+  <p class="help">A presenter clicker works too: forward = correct, back = pass.</p>
+</section>
+
+<section class="screen" id="done">
+  <div class="center">
+    <div class="up d">Time's up!</div>
+    <div class="name d" id="dTeam" style="font-size:clamp(34px,5vw,60px)"></div>
+    <div class="big-n d" id="dNum">0</div>
+    <p class="note" id="dSub">correct</p>
+    <div class="lists">
+      <div><h3>Correct</h3><div class="chips" id="dC"></div></div>
+      <div><h3>Passed or not finished</h3><div class="chips" id="dP"></div></div>
+    </div>
+    <p class="note">Mis-click? Tap a word to move it to the other list.</p>
+    <button class="btn" data-go="board">Back to scoreboard</button>
+  </div>
+</section>
+
+<section class="screen win" id="winner">
+  <div class="conf" id="conf"></div>
+  <div class="center">
+    <p class="note" style="font-size:22px">And the charades champion is…</p>
+    <div class="name d" id="wTeam"></div>
+    <p class="d" style="font-size:clamp(28px,4vw,44px)" id="wScore"></p>
+    <p class="note" id="wHow"></p>
+    <button class="btn" data-go="board">Back to scoreboard</button>
+  </div>
+</section>
+
+<section class="screen" id="setup">
+  <div class="top">
+    <h1 class="d">Setup</h1>
+    <div class="row">
+      <button class="btn" data-go="saveSetup">Save and go back</button>
+      <button class="btn ghost" data-go="board">Cancel</button>
+    </div>
+  </div>
+  <div class="grid" id="names"></div>
+  <div class="grid">
+    <label>Round length (seconds)<input type="number" id="sSecs" min="30" max="600" step="10"></label>
+    <label>Passes allowed (0 = unlimited)<input type="number" id="sPass" min="0" max="20"></label>
+    <label>Tie-break length (seconds)<input type="number" id="sTb" min="20" max="300" step="10"></label>
+  </div>
+  <div class="two">
+    <label>Words: one per line, as <span style="font-weight:800">Category | Word</span>, 1 or 2 words each. Category "Famous faces" gets mixed into every team's set. Lines starting with # are ignored.<textarea id="sWords" spellcheck="false"></textarea></label>
+    <label>Tie-break words (kept apart so nobody has seen them)<textarea id="sTbW" spellcheck="false"></textarea></label>
+  </div>
+  <p class="note" id="sCount"></p>
+  <div class="row">
+    <button class="btn ghost" data-go="resetUsed" data-confirm="Click again to reuse every word">Reuse all words</button>
+    <button class="btn red" data-go="resetAll" data-confirm="Click again: this clears all scores">Reset all scores</button>
+  </div>
+</section>
+
+<script>
+{
+const KEY='gio-gto-charades-2026-v2';
+const DEF_WORDS=`# One or two words only. Add your own in the same format, e.g.  Our people | (leader's name)
+# Good ones: your leaders' names, the AI tools the team built, the company slogan
+# "Famous faces" are mixed into every team's set: about one card in three.
+Our people | Xinfa
+Our people | Czarina
+Famous faces | Donald Trump
+Famous faces | Elon Musk
+Famous faces | Jensen Huang
+Famous faces | Taylor Swift
+Famous faces | Jackie Chan
+Famous faces | Bruce Lee
+Famous faces | Stephen Chow
+Famous faces | Andy Lau
+Famous faces | Mark Zuckerberg
+Famous faces | Michael Jackson
+Famous faces | Mr Bean
+Famous faces | Cristiano Ronaldo
+Famous faces | Lionel Messi
+Famous faces | Usain Bolt
+Famous faces | Barack Obama
+Famous faces | Steve Jobs
+Famous faces | Bill Gates
+Famous faces | Gordon Ramsay
+Famous faces | Lady Gaga
+Famous faces | Elvis Presley
+Famous faces | Charlie Chaplin
+Famous faces | Sam Altman
+Famous faces | Jay Chou
+Famous faces | Mariah Carey
+Famous faces | Tom Cruise
+Famous faces | Psy
+Christmas | Santa Claus
+Christmas | Melting snowman
+Christmas | Sneezing reindeer
+Christmas | Angry elf
+Christmas | Tangled lights
+Christmas | Escaping turkey
+Christmas | Ugly sweater
+Christmas | Snow angel
+Christmas | Snowball fight
+Christmas | Ice skating
+Christmas | Gift wrapping
+Christmas | Candy cane
+Christmas | Gingerbread man
+Christmas | Sleigh ride
+Christmas | Christmas carol
+Christmas | Hot chocolate
+Office life | Printer jam
+Office life | Reply all
+Office life | On mute
+Office life | Monday morning
+Office life | Deadline panic
+Office life | Power nap
+Office life | Coffee break
+Office life | Microwave queue
+Office life | Zoom call
+Office life | Payday
+Office life | Annual leave
+Office life | Overtime
+Hong Kong | MTR
+Hong Kong | Typhoon
+Hong Kong | Octopus card
+Hong Kong | Milk tea
+Hong Kong | Egg waffle
+Hong Kong | Mahjong
+Hong Kong | Lion dance
+Hong Kong | Dim sum
+Hong Kong | Peak Tram
+Hong Kong | Pineapple bun
+Hong Kong | Red minibus
+Movies and songs | Home Alone
+Movies and songs | Frozen
+Movies and songs | The Grinch
+Movies and songs | Titanic
+Movies and songs | Jurassic Park
+Movies and songs | Spider-Man
+Movies and songs | Lion King
+Movies and songs | Squid Game
+Movies and songs | Gangnam Style
+Movies and songs | Baby Shark
+Movies and songs | YMCA
+Movies and songs | Macarena
+AI and tech | ChatGPT
+AI and tech | Claude
+AI and tech | Chatbot
+AI and tech | Robot dance
+AI and tech | Copy paste
+AI and tech | Password reset
+AI and tech | Deepfake
+AI and tech | Blue screen
+AI and tech | Selfie`;
+const DEF_TB=`Famous faces | Freddie Mercury
+Famous faces | Albert Einstein
+Famous faces | Beyonce
+Tie-break | Santa yoga
+Tie-break | Penguin waddle
+Tie-break | Falling tree
+Tie-break | Elf selfie
+Tie-break | Robot waiter`;
+const COLORS=['#e5483f','#d5dde0','#f3c34d','#3fbf6f'];
+const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:3,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null]});
+let S=fresh();
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.names))S=Object.assign(fresh(),s)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const parse=txt=>txt.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')).map(l=>{const i=l.indexOf('|');return i<0?{c:'',w:l}:{c:l.slice(0,i).trim(),w:l.slice(i+1).trim()}}).filter(x=>x.w);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const bauble=c=>`<svg class="bauble" viewBox="0 0 42 48" aria-hidden="true"><rect x="16" y="2" width="10" height="8" rx="2" fill="#c9a43c"/><circle cx="21" cy="28" r="18" fill="${c}"/><ellipse cx="21" cy="38" rx="14" ry="6" fill="rgba(0,0,0,.18)"/><circle cx="14" cy="21" r="5" fill="rgba(255,255,255,.45)"/></svg>`;
+let cur='board';
+function show(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));window.scrollTo(0,0)}
+
+/* sound */
+let ac=null,muted=false;
+function tone(f,d,type,v){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.2,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+const ding=()=>{tone(880,.15);setTimeout(()=>tone(1320,.3),90)};
+const thud=()=>tone(170,.22,'triangle',.3);
+const tick=()=>tone(700,.08,'square',.07);
+const buzz=()=>{tone(110,1,'sawtooth',.3);tone(116,1,'sawtooth',.2)};
+
+/* results */
+const passes=x=>(x.r?x.r.p.length:0)+(x.t?x.t.p.length:0);
+function verdict(){
+  const all=S.names.map((n,i)=>({i,n,r:S.res[i],t:S.tb[i]}));
+  const played=all.filter(x=>x.r).length;
+  if(played<all.length)return{state:'playing',played};
+  const top=Math.max(...all.map(x=>x.r.c.length));
+  let tied=all.filter(x=>x.r.c.length===top);
+  if(tied.length===1)return{state:'win',w:tied[0],how:''};
+  if(tied.some(x=>!x.t))return{state:'tie',tied};
+  const tbTop=Math.max(...tied.map(x=>x.t.c.length));
+  tied=tied.filter(x=>x.t.c.length===tbTop);
+  if(tied.length===1)return{state:'win',w:tied[0],how:'Won on the tie-break'};
+  const minP=Math.min(...tied.map(passes));
+  tied=tied.filter(x=>passes(x)===minP);
+  if(tied.length===1)return{state:'win',w:tied[0],how:'Level after the tie-break, won on fewer passed words'};
+  return{state:'coin',tied};
+}
+const list=a=>a.map(x=>esc(x.n)).join(' and ');
+function renderBoard(){
+  const v=verdict();
+  const top=Math.max(0,...S.res.map(r=>r?r.c.length:0));
+  const tiedIdx=v.state==='tie'?v.tied.map(x=>x.i):[];
+  $('teams').innerHTML=S.names.map((n,i)=>{
+    const r=S.res[i],t=S.tb[i];
+    let btn=!r?`<button class="btn" data-go="play" data-i="${i}">Play ${esc(n)}</button>`
+      :tiedIdx.includes(i)&&!t?`<button class="btn red" data-go="tb" data-i="${i}">Play tie-break</button>`
+      :`<button class="btn ghost" data-go="replay" data-i="${i}" data-confirm="Click again to replay">Replay</button>`;
+    return `<article class="tc${r&&r.c.length===top&&top>0?' lead':''}"><header>${bauble(COLORS[i%4])}<h2 class="d">${esc(n)}</h2></header>
+      <div class="pts d">${r?r.c.length:'–'}<small>${r?'correct':'not played yet'}</small></div>
+      <div class="meta">${r?`${r.p.length} passed`:'&nbsp;'}${t?` · Tie-break: <b>${t.c.length}</b> correct`:''}</div>${btn}</article>`}).join('');
+  const st=$('status');
+  if(v.state==='playing')st.innerHTML=`<b>${v.played} of ${S.names.length}</b> teams have played. Each team gets ${fmt(S.secs)}.`;
+  else if(v.state==='tie')st.innerHTML=`It's a tie between <b>${list(v.tied)}</b>! Each plays a ${S.tbSecs}-second tie-break with fresh words.`;
+  else if(v.state==='coin')st.innerHTML=`Still level between <b>${list(v.tied)}</b> after the tie-break and passes. Xinfa tosses a coin!`;
+  else st.innerHTML=`All teams have played. We have a winner!`;
+  $('boardActions').innerHTML=v.state==='win'?`<button class="btn big" style="flex:none" data-go="reveal">Reveal the winner</button>`:'';
+}
+
+/* round: every third card is a famous face while any are left */
+const isFace=x=>/famous|public|people/i.test(x.c);
+function deal(pool){const f=shuffle(pool.filter(isFace)),o=shuffle(pool.filter(x=>!isFace(x))),d=[];
+  while(f.length||o.length){for(let k=0;k<2&&o.length;k++)d.push(o.shift());if(f.length)d.push(f.shift());if(!o.length)while(f.length)d.push(f.shift())}
+  return d}
+/* round */
+let R=null,lastSec=null;
+function prepare(i,tb){
+  const used=new Set(S.used),secs=tb?S.tbSecs:S.secs;
+  R={i,tb,secs,deck:deal(parse(tb?S.tbWords:S.words).filter(x=>!used.has(x.w))),cur:null,c:[],p:[],h:[],left:secs*1000,run:false,last:0};
+  $('rTeam').textContent=S.names[i];
+  $('rKind').textContent=tb?`Tie-break · ${fmt(secs)} on the clock`:`${fmt(secs)} on the clock`;
+  $('rPass').textContent=S.passLimit>0?`${S.passLimit} passes allowed.`:'Unlimited passes.';
+  $('rWarn').textContent=R.deck.length<20?`Only ${R.deck.length} unused words left. Add more in Setup.`:'';
+  show('ready');
+}
+function begin(){if(!R)return;show('play');$('pTeam').textContent=S.names[R.i];lastSec=null;next();resume()}
+function next(){R.cur=R.deck.shift()||null;if(R.cur){S.used.push(R.cur.w);save()}drawCard()}
+function drawCard(){
+  const w=R.cur?R.cur.w:'Out of words!',c=R.cur?R.cur.c:'Add more in Setup';
+  const el=$('pWord');el.textContent=w;el.className='word d '+(w.length<=12?'w1':w.length<=24?'w2':'w3');
+  $('pCat').textContent=c;$('pCat').hidden=!c;
+  const card=$('pCard');card.classList.remove('pop');void card.offsetWidth;card.classList.add('pop');
+}
+function paint(){
+  const s=R.left/1000,low=s<=10;
+  $('pTime').textContent=fmt(s);$('pTime').classList.toggle('low',low&&R.run);
+  $('pProg').style.width=Math.max(0,R.left/(R.secs*10))+'%';$('pBar').classList.toggle('low',low);
+  $('pScore').textContent=R.c.length;
+  const lim=S.passLimit,left=lim-R.p.length;
+  $('pPass').disabled=lim>0&&left<=0;
+  $('pPass').innerHTML=lim>0?(left>0?`Pass (${left} left) <kbd>←</kbd>`:'No passes left'):'Pass <kbd>←</kbd>';
+  $('pPauseBtn').innerHTML=R.run?'Pause <kbd>P</kbd>':'Resume <kbd>P</kbd>';
+}
+function resume(){if(!R||R.run||R.left<=0)return;R.run=true;R.last=performance.now();$('pPaused').hidden=true;paint();requestAnimationFrame(loop)}
+function pause(){if(!R||!R.run)return;R.run=false;$('pPaused').hidden=false;paint()}
+function loop(){
+  if(!R||!R.run)return;
+  const now=performance.now();R.left-=now-R.last;R.last=now;
+  const s=Math.ceil(R.left/1000);if(s!==lastSec){if(s<=10&&s>0)tick();lastSec=s}
+  if(R.left<=0){finish();return}
+  paint();requestAnimationFrame(loop);
+}
+function act(k){
+  if(!R||!R.run||!R.cur)return;
+  if(k==='p'&&S.passLimit>0&&R.p.length>=S.passLimit)return;
+  (k==='c'?R.c:R.p).push(R.cur.w);R.h.push({k,card:R.cur});
+  k==='c'?ding():thud();next();paint();
+}
+function undo(){
+  if(!R||!R.h.length||R.left<=0)return;
+  const last=R.h.pop();(last.k==='c'?R.c:R.p).pop();
+  if(R.cur){R.deck.unshift(R.cur);const j=S.used.lastIndexOf(R.cur.w);if(j>-1)S.used.splice(j,1)}
+  R.cur=last.card;drawCard();paint();save();
+}
+function finish(){
+  R.run=false;R.left=0;paint();buzz();
+  const rec={c:R.c.slice(),p:R.p.slice()};if(R.cur)rec.p.push(R.cur.w);
+  if(R.tb)S.tb[R.i]=rec;else S.res[R.i]=rec;
+  save();showDone();
+}
+function showDone(){
+  const rec=R.tb?S.tb[R.i]:S.res[R.i];
+  $('dTeam').textContent=S.names[R.i]+(R.tb?' · tie-break':'');
+  chips(rec);
+  const n=rec.c.length,el=$('dNum'),t0=performance.now();
+  show('done');
+  const step=t=>{const k=Math.min(1,(t-t0)/1200);el.textContent=Math.round(n*k);if(k<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+function chips(rec){
+  $('dC').innerHTML=rec.c.map((w,j)=>`<button class="chip c" data-go="mv" data-from="c" data-j="${j}">${esc(w)}</button>`).join('')||'<span class="note">None</span>';
+  $('dP').innerHTML=rec.p.map((w,j)=>`<button class="chip" data-go="mv" data-from="p" data-j="${j}">${esc(w)}</button>`).join('')||'<span class="note">None</span>';
+  $('dNum').textContent=rec.c.length;$('dSub').textContent=rec.c.length===1?'correct':'correct';
+}
+function move(from,j){
+  const rec=R.tb?S.tb[R.i]:S.res[R.i];const a=from==='c'?rec.c:rec.p,b=from==='c'?rec.p:rec.c;
+  b.push(a.splice(j,1)[0]);save();chips(rec);
+}
+
+/* setup */
+function openSetup(){
+  $('names').innerHTML=S.names.map((n,i)=>`<label>Table ${i+1} team name<input id="sN${i}" value="${esc(n)}"></label>`).join('');
+  $('sSecs').value=S.secs;$('sPass').value=S.passLimit;$('sTb').value=S.tbSecs;
+  $('sWords').value=S.words;$('sTbW').value=S.tbWords;count();show('setup');
+}
+function count(){const n=parse($('sWords').value).length,u=parse($('sWords').value).filter(x=>S.used.includes(x.w)).length;
+  const long=parse($('sWords').value+'\n'+$('sTbW').value).filter(x=>x.w.split(/\s+/).length>2).map(x=>x.w);
+  $('sCount').textContent=`${n} words (${u} already used), ${parse($('sTbW').value).length} tie-break words. Four 3-minute rounds use roughly 50 to 70 words.`+(long.length?` Longer than 2 words: ${long.join(', ')}.`:'')}
+function saveSetup(){
+  S.names=S.names.map((n,i)=>($('sN'+i).value.trim()||n));
+  const num=(id,d,lo,hi)=>{const v=parseInt($(id).value,10);return isNaN(v)?d:Math.min(hi,Math.max(lo,v))};
+  S.secs=num('sSecs',180,30,600);S.passLimit=num('sPass',3,0,20);S.tbSecs=num('sTb',60,20,300);
+  S.words=$('sWords').value;S.tbWords=$('sTbW').value;save();renderBoard();show('board');
+}
+function fs(){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+
+/* events */
+const armed=new WeakMap();
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]');if(!b)return;
+  if(b.dataset.confirm&&!armed.get(b)){const old=b.innerHTML;armed.set(b,true);b.textContent=b.dataset.confirm;setTimeout(()=>{armed.delete(b);if(b.isConnected)b.innerHTML=old},3000);return}
+  const go=b.dataset.go,i=+b.dataset.i;
+  if(go==='play')prepare(i,false);
+  else if(go==='tb')prepare(i,true);
+  else if(go==='replay'){S.res[i]=null;S.tb[i]=null;save();prepare(i,false)}
+  else if(go==='begin')begin();
+  else if(go==='correct')act('c');
+  else if(go==='pass')act('p');
+  else if(go==='undo')undo();
+  else if(go==='pause')R&&(R.run?pause():resume());
+  else if(go==='abort'){if(R){R.run=false;R=null}renderBoard();show('board')}
+  else if(go==='mv')move(b.dataset.from,+b.dataset.j);
+  else if(go==='board'){if(cur==='play')return;renderBoard();show('board')}
+  else if(go==='reveal')reveal();
+  else if(go==='setup')openSetup();
+  else if(go==='saveSetup')saveSetup();
+  else if(go==='resetUsed'){S.used=[];save();count()}
+  else if(go==='resetAll'){S.res=[null,null,null,null];S.tb=[null,null,null,null];S.used=[];save();count()}
+  else if(go==='fs')fs();
+  else if(go==='mute'){muted=!muted;$('mute').textContent=muted?'Sound off':'Sound on'}
+});
+$('pAbort').dataset.confirm='Click again to cancel (no score saved)';
+document.addEventListener('input',e=>{if(e.target.id==='sWords'||e.target.id==='sTbW')count()});
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea')||e.repeat)return;
+  const k=e.key.length===1?e.key.toLowerCase():e.key;
+  if(cur==='ready'&&[' ','Enter','PageDown','ArrowRight'].includes(k)){e.preventDefault();begin();return}
+  if(cur==='play'){
+    if(['ArrowRight','PageDown','Enter','c'].includes(k)){e.preventDefault();act('c')}
+    else if(['ArrowLeft','PageUp','x'].includes(k)){e.preventDefault();act('p')}
+    else if(['Backspace','z'].includes(k)){e.preventDefault();undo()}
+    else if([' ','p','.','b','Escape'].includes(k)){e.preventDefault();R&&(R.run&&k!=='Escape'||k==='Escape'?pause():resume())}
+  }
+  if(k==='f')fs();
+  if(k==='m'){muted=!muted;$('mute').textContent=muted?'Sound off':'Sound on'}
+});
+function reveal(){
+  const v=verdict();if(v.state!=='win')return;
+  const r=v.w.r;$('wTeam').textContent=v.w.n;
+  $('wScore').textContent=`${r.c.length} correct`+(v.w.t?` · tie-break ${v.w.t.c.length}`:'');
+  $('wHow').textContent=v.how;
+  const cols=['#f3c34d','#e5483f','#3fbf6f','#fff8ea'];
+  $('conf').innerHTML=Array.from({length:70},(_,j)=>`<i style="left:${Math.random()*100}%;background:${cols[j%4]};animation-duration:${3+Math.random()*4}s;animation-delay:${-Math.random()*6}s"></i>`).join('');
+  tone(523,.2);setTimeout(()=>tone(659,.2),180);setTimeout(()=>tone(784,.2),360);setTimeout(()=>tone(1047,.5),540);
+  show('winner');
+}
+renderBoard();
+}
+</script>
+</body>
+</html>
