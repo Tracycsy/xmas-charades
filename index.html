@@ -132,6 +132,39 @@ kbd{font:800 12px var(--sans);padding:2px 7px;border-radius:6px;background:rgba(
 .conf{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:3}
 .conf i{position:absolute;top:-24px;width:12px;height:20px;border-radius:3px;animation:fall linear infinite}
 @keyframes fall{to{transform:translateY(112vh) rotate(760deg)}}
+/* scavenger hunt */
+.hgrid{flex:1;display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:clamp(14px,1.6vw,26px);align-items:stretch}
+.hlist{background:linear-gradient(180deg,var(--ivory),var(--champ));color:var(--ink);border-radius:26px;padding:clamp(16px,1.8vw,28px);box-shadow:0 14px 0 rgba(78,7,11,.35),0 30px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:14px}
+.hlist h3{margin:0;display:flex;align-items:center;gap:10px;font:400 clamp(22px,1.9vw,30px)/1.1 var(--serif);color:var(--red-d)}
+.hlist h3 i{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--red);color:var(--ivory);font:900 15px var(--sans);font-style:normal}
+.hitems{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 22px;list-style:none;margin:0;padding:0}
+.hitems.one{grid-template-columns:1fr}
+.hitems li{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed rgba(122,12,18,.18);font-size:clamp(15px,1.25vw,20px);font-weight:700}
+.hitems li b{flex:none;color:var(--red);font-weight:900;white-space:nowrap}
+.hside{display:flex;flex-direction:column;align-items:center;gap:10px;padding:clamp(14px,1.6vw,24px);border-radius:26px;background:rgba(78,7,11,.35);border:1px solid var(--line)}
+.hside .ring{width:clamp(140px,11.5vw,210px)}
+.hside .ring .t{font-size:clamp(30px,2.9vw,52px)}
+[hidden]{display:none!important}
+.hmsg{min-height:26px;font-weight:900;color:var(--gold-s);text-align:center;font-size:clamp(17px,1.4vw,22px)}
+.hmsg.flash{animation:beat .6s 3}
+.tots{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:auto}
+.tot{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:15px;border-radius:14px;background:rgba(255,253,246,.1);border:1px solid var(--line);font-weight:800}
+.tot img{width:28px;height:auto}
+.tot span{flex:1}
+.tot b{font:900 24px var(--sans);color:var(--gold-s);font-variant-numeric:tabular-nums}
+.tot.lead{border-color:var(--gold);background:rgba(212,175,55,.2)}
+.scroll{overflow-x:auto}
+table.sct{width:100%;border-collapse:collapse;color:var(--ivory)}
+.sct th,.sct td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-weight:800}
+.sct th{color:var(--gold-s);position:sticky;top:0;background:var(--red-d)}
+.sct td.c,.sct th.c{text-align:center}
+.sct tr.sum td{font:900 24px var(--sans);color:var(--gold-s);border-bottom:0}
+.tick{width:52px;height:44px;border-radius:12px;border:2px solid var(--line);background:rgba(78,7,11,.35);color:var(--ivory);cursor:pointer;display:inline-grid;place-items:center}
+.tick.on{background:var(--green);border-color:var(--green-b)}
+.tick.bad.on{background:var(--ivory);color:var(--red);border-color:var(--ivory)}
+.tick svg{width:22px;height:22px}
+.setup-h{margin:6px 0 0;font:400 28px var(--serif);color:var(--gold-s)}
+@media(max-width:900px){.hgrid{grid-template-columns:1fr}.hitems{grid-template-columns:1fr}}
 /* setup */
 .sheet{background:rgba(78,7,11,.45);border:1px solid var(--line);border-radius:22px;padding:clamp(16px,2vw,26px);display:flex;flex-direction:column;gap:16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
@@ -170,6 +203,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
       <p class="sub">GIO &amp; GTO Christmas Lunch · 4 December 2026</p>
     </div>
     <div class="tools">
+      <button class="ib" data-go="hunt"><svg><use href="#i-star"/></svg>Scavenger hunt</button>
       <button class="ib" data-go="fs" aria-label="Full screen"><svg><use href="#i-max"/></svg>Full screen <kbd>F</kbd></button>
       <button class="ib" data-go="mute" id="mute" aria-label="Toggle sound"><svg><use href="#i-vol"/></svg><span>Sound on</span></button>
       <button class="ib" data-go="setup" aria-label="Setup"><svg><use href="#i-set"/></svg>Setup</button>
@@ -244,11 +278,53 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
   <div class="conf" id="conf"></div>
   <div class="center">
     <svg class="crown" viewBox="0 0 24 24"><use href="#i-crown"/></svg>
-    <p class="kicker">And the charades champion is…</p>
+    <p class="kicker" id="wKick">And the charades champion is…</p>
     <div class="big-name" id="wTeam"></div>
     <p class="up" style="font-size:clamp(32px,4vw,56px)" id="wScore"></p>
     <p class="sub" id="wHow"></p>
     <button class="btn gold" data-go="board">Back to scoreboard</button>
+  </div>
+</section>
+
+<section class="screen" id="hunt">
+  <div class="top">
+    <div>
+      <h1>Scavenger <em>hunt</em></h1>
+      <p class="sub">Game 2 · from your pockets, bags and props bag · <span id="hMax"></span></p>
+    </div>
+    <div class="tools">
+      <button class="ib" data-go="board"><svg><use href="#i-play"/></svg>Charades</button>
+      <button class="ib" data-go="hscore"><svg><use href="#i-check"/></svg>Score teams</button>
+      <button class="ib" data-go="fs" aria-label="Full screen"><svg><use href="#i-max"/></svg>Full screen</button>
+      <button class="ib" data-go="setup"><svg><use href="#i-set"/></svg>Setup</button>
+    </div>
+  </div>
+  <div class="hgrid">
+    <div class="hlist" id="hList"></div>
+    <aside class="hside">
+      <div class="ring" id="hRing"><svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="52" fill="none" stroke-width="10"/><circle class="arc" id="hArc" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="0"/></svg><div class="t" id="hTime">10:00</div></div>
+      <div class="hmsg" id="hMsg" role="status"></div>
+      <div class="actions">
+        <button class="btn gold" data-go="hstart" id="hStart"><svg><use href="#i-play"/></svg><span>Start</span> <kbd>Space</kbd></button>
+        <button class="btn ghost-l" data-go="hreset" data-confirm="Click again to reset">Reset</button>
+      </div>
+      <div class="tots" id="hTots"></div>
+      <button class="btn gold wide" data-go="hreveal" id="hReveal"><svg><use href="#i-crown"/></svg>Reveal hunt winner</button>
+    </aside>
+  </div>
+</section>
+
+<section class="screen" id="hscore">
+  <div class="top">
+    <h1>Score the <em>hunt</em></h1>
+    <div class="tools">
+      <button class="btn gold" data-go="hunt">Done</button>
+    </div>
+  </div>
+  <div class="sheet">
+    <div class="scroll"><table class="sct" id="hTable"></table></div>
+    <p class="note">Tap a box to tick an item for that team. Tie on points? The team whose basket reached the podium first wins.</p>
+    <div class="tools"><button class="btn ghost-l" data-go="hclear" data-confirm="Click again to clear all ticks">Clear all ticks</button></div>
   </div>
 </section>
 
@@ -272,6 +348,12 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
       <label>Tie-break words (kept apart so nobody has seen them)<textarea id="sTbW" spellcheck="false"></textarea></label>
     </div>
     <p class="note" id="sCount"></p>
+    <h2 class="setup-h">Scavenger hunt</h2>
+    <div class="grid">
+      <label>Hunt length (minutes)<input type="number" id="sHMin" min="1" max="30"></label>
+      <label>Late basket penalty (points)<input type="number" id="sHLate" min="0" max="20"></label>
+    </div>
+    <label>Hunt list: one per line as Basket or Photo | item | points. Changing the list clears the hunt ticks.<textarea id="sHunt" spellcheck="false" style="min-height:240px"></textarea></label>
     <div class="tools">
       <button class="btn ghost-l" data-go="resetUsed" data-confirm="Click again to reuse every word">Reuse all words</button>
       <button class="btn red" data-go="resetAll" data-confirm="Click again: this clears all scores">Reset all scores</button>
@@ -381,8 +463,28 @@ Tie-break | Penguin waddle
 Tie-break | Falling tree
 Tie-break | Elf selfie
 Tie-break | Robot waiter`;
+const DEF_HUNT=`# One per line: Basket or Photo | item | points
+Basket | A GIO staff pass and a GTO staff pass | 2
+Basket | A business card | 1
+Basket | An Octopus card | 1
+Basket | A $10 coin | 1
+Basket | A receipt dated December 2026 | 1
+Basket | A lipstick or lip balm | 1
+Basket | A hand cream | 1
+Basket | A pen | 1
+Basket | A hair tie | 1
+Basket | Earphones | 1
+Basket | A power bank or charging cable | 1
+Basket | Something red | 1
+Basket | A sock (yes, off a foot) | 2
+Basket | Something starting with X (for Xinfa) | 2
+Photo | Team photo: 2 people in reindeer antlers and 2 in Santa hats | 3
+Photo | 3 people in Christmas glasses doing their best snowman pose | 3
+Photo | Selfie with Xinfa, both wearing a Christmas prop | 3
+Photo | Human Christmas tree: whole team, every person wearing a prop | 3
+Photo | Video: whole team in props singing 10 seconds of a Christmas song | 3`;
 const COLORS=['#B5121B','#D5DDE0','#D4AF37','#0F5C3B'];
-const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:3,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null]});
+const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:3,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null],hMin:10,hLate:3,hunt:DEF_HUNT,hs:[[],[],[],[]],hl:[false,false,false,false]});
 let S=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.names))S=Object.assign(fresh(),s)}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -406,9 +508,9 @@ function drawLights(){const W=1600,H=84,cols=['#F3DC8A','#FFFDF6','#2FA86E','#D4
 drawLights();
 /* snow */
 {const cv=$('snow'),cx=cv.getContext('2d');let fl=[],W=0,H=0;
-  const size=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;fl=Array.from({length:Math.round(W/18)},()=>({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*3,s:.3+Math.random()*.9,d:Math.random()*6}))};
+  const size=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;fl=Array.from({length:Math.round(W/18)},()=>({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*3,s:.12+Math.random()*.33,d:Math.random()*6}))};
   size();addEventListener('resize',size);
-  const tickSnow=()=>{cx.clearRect(0,0,W,H);cx.fillStyle='rgba(255,253,246,.75)';for(const f of fl){f.y+=f.s;f.d+=.01;f.x+=Math.sin(f.d)*.4;if(f.y>H){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()}if(!document.hidden)requestAnimationFrame(tickSnow)};
+  const tickSnow=()=>{cx.clearRect(0,0,W,H);cx.fillStyle='rgba(255,253,246,.75)';for(const f of fl){f.y+=f.s;f.d+=.006;f.x+=Math.sin(f.d)*.25;if(f.y>H){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()}if(!document.hidden)requestAnimationFrame(tickSnow)};
   if(!reduce){requestAnimationFrame(tickSnow);document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestAnimationFrame(tickSnow)})}}
 
 /* sound */
@@ -543,11 +645,61 @@ function move(from,j){
   b.push(a.splice(j,1)[0]);save();chips(rec);
 }
 
+/* scavenger hunt */
+const parseHunt=txt=>txt.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')).map(l=>{const p=l.split('|').map(x=>x.trim());
+  if(p.length>=3)return{g:p[0]||'Basket',t:p[1],pts:parseInt(p[2],10)||1};if(p.length===2)return{g:'Basket',t:p[0],pts:parseInt(p[1],10)||1};return{g:'Basket',t:p[0],pts:1}}).filter(x=>x.t);
+const gName=g=>/photo/i.test(g)?'Photo tasks with your props':/basket/i.test(g)?'Put it in the basket':g;
+const hTotal=i=>{const it=parseHunt(S.hunt);return S.hs[i].reduce((a,k)=>a+(it[k]?it[k].pts:0),0)-(S.hl[i]?S.hLate:0)};
+const HT={left:null,run:false,last:0,warned:{}};const hTot=()=>S.hMin*60000;
+function renderHunt(){
+  const it=parseHunt(S.hunt),groups=[];it.forEach((x,k)=>{let g=groups.find(y=>y.g===x.g);if(!g)groups.push(g={g:x.g,items:[]});g.items.push(x)});
+  $('hMax').textContent=`up to ${it.reduce((a,x)=>a+x.pts,0)} points`;
+  $('hList').innerHTML=groups.map((g,n)=>`<h3><i>${n+1}</i>${esc(gName(g.g))}</h3><ul class="hitems${/photo/i.test(g.g)?' one':''}">${g.items.map(x=>`<li><span>${esc(x.t)}</span><b>${x.pts} ${x.pts>1?'pts':'pt'}</b></li>`).join('')}</ul>`).join('');
+  const tots=S.names.map((n,i)=>hTotal(i)),top=Math.max(...tots),any=S.hs.some(a=>a.length);
+  $('hTots').innerHTML=S.names.map((n,i)=>`<div class="tot${any&&tots[i]===top?' lead':''}"><img src="${baubleSrc(COLORS[i%4])}" alt=""><span>${esc(n)}</span><b>${tots[i]}</b></div>`).join('');
+  $('hReveal').hidden=!any;
+  if(HT.left===null)HT.left=hTot();paintHunt();
+}
+function paintHunt(){
+  const s=HT.left/1000,low=s<=10;
+  $('hTime').textContent=fmt(s);$('hRing').classList.toggle('low',low&&HT.run);
+  $('hArc').style.strokeDashoffset=(CIRC*(1-Math.max(0,HT.left)/hTot())).toFixed(1);
+  $('hStart').innerHTML=HT.run?`${ico('pause')}<span>Pause</span> <kbd>Space</kbd>`:`${ico('play')}<span>${HT.left<hTot()&&HT.left>0?'Resume':'Start'}</span> <kbd>Space</kbd>`;
+  $('hStart').disabled=HT.left<=0;
+}
+function hMsg(t){const m=$('hMsg');m.textContent=t;m.classList.remove('flash');void m.offsetWidth;m.classList.add('flash')}
+function hToggle(){if(HT.run){HT.run=false;paintHunt();return}if(HT.left<=0)return;if(HT.left===hTot()){HT.warned={};hMsg('Go go go!');tone(880,.3)}HT.run=true;HT.last=performance.now();paintHunt();requestAnimationFrame(hLoop)}
+function hLoop(){
+  if(!HT.run)return;const now=performance.now();HT.left-=now-HT.last;HT.last=now;
+  const s=Math.ceil(HT.left/1000);
+  for(const m of [5,2,1])if(s===m*60&&!HT.warned[m]&&hTot()>m*60000){HT.warned[m]=1;hMsg(m===1?'1 minute left!':`${m} minutes left!`);tone(660,.25);setTimeout(()=>tone(660,.25),300)}
+  if(s<=10&&s>0&&HT.warned.t!==s){HT.warned.t=s;tick()}
+  if(HT.left<=0){HT.left=0;HT.run=false;buzz();hMsg("Time's up! Runners, baskets to the podium");paintHunt();return}
+  paintHunt();requestAnimationFrame(hLoop);
+}
+function renderScore(){
+  const it=parseHunt(S.hunt),ck=`<svg><use href="#i-check"/></svg>`;
+  let h=`<thead><tr><th>Item</th><th class="c">Pts</th>${S.names.map(n=>`<th class="c">${esc(n)}</th>`).join('')}</tr></thead><tbody>`;
+  h+=it.map((x,k)=>`<tr><td>${esc(x.t)}</td><td class="c">${x.pts}</td>${S.names.map((n,i)=>{const on=S.hs[i].includes(k);return `<td class="c"><button class="tick${on?' on':''}" data-go="htog" data-i="${i}" data-k="${k}" aria-pressed="${on}" aria-label="${esc(n)}: ${esc(x.t)}">${on?ck:''}</button></td>`}).join('')}</tr>`).join('');
+  h+=`<tr><td>Late basket</td><td class="c">−${S.hLate}</td>${S.names.map((n,i)=>`<td class="c"><button class="tick bad${S.hl[i]?' on':''}" data-go="hlate" data-i="${i}" aria-pressed="${S.hl[i]}" aria-label="${esc(n)} late">${S.hl[i]?'−'+S.hLate:''}</button></td>`).join('')}</tr>`;
+  h+=`<tr class="sum"><td>Total</td><td></td>${S.names.map((n,i)=>`<td class="c">${hTotal(i)}</td>`).join('')}</tr></tbody>`;
+  $('hTable').innerHTML=h;
+}
+function hReveal(){
+  const tots=S.names.map((n,i)=>hTotal(i)),top=Math.max(...tots),w=S.names.filter((n,i)=>tots[i]===top);
+  $('wKick').textContent='And the scavenger hunt champion is…';
+  $('wTeam').textContent=w.join(' & ');$('wScore').textContent=`${top} points`;
+  $('wHow').textContent=w.length>1?'Tied on points: the team whose basket reached the podium first wins':'';
+  confetti();show('winner');
+}
+
 /* setup */
-function openSetup(){
+let back='board';
+function openSetup(){back=cur==='hunt'||cur==='hscore'?'hunt':'board';
   $('names').innerHTML=S.names.map((n,i)=>`<label>Table ${i+1} team name<input id="sN${i}" value="${esc(n)}"></label>`).join('');
   $('sSecs').value=S.secs;$('sPass').value=S.passLimit;$('sTb').value=S.tbSecs;
-  $('sWords').value=S.words;$('sTbW').value=S.tbWords;count();show('setup');
+  $('sWords').value=S.words;$('sTbW').value=S.tbWords;
+  $('sHMin').value=S.hMin;$('sHLate').value=S.hLate;$('sHunt').value=S.hunt;count();show('setup');
 }
 function count(){const n=parse($('sWords').value).length,u=parse($('sWords').value).filter(x=>S.used.includes(x.w)).length;
   const long=parse($('sWords').value+'\n'+$('sTbW').value).filter(x=>x.w.split(/\s+/).length>2).map(x=>x.w);
@@ -556,7 +708,10 @@ function saveSetup(){
   S.names=S.names.map((n,i)=>($('sN'+i).value.trim()||n));
   const num=(id,d,lo,hi)=>{const v=parseInt($(id).value,10);return isNaN(v)?d:Math.min(hi,Math.max(lo,v))};
   S.secs=num('sSecs',180,30,600);S.passLimit=num('sPass',3,0,20);S.tbSecs=num('sTb',60,20,300);
-  S.words=$('sWords').value;S.tbWords=$('sTbW').value;save();renderBoard();show('board');
+  S.words=$('sWords').value;S.tbWords=$('sTbW').value;
+  const hm=num('sHMin',10,1,30);if(hm!==S.hMin&&!HT.run){S.hMin=hm;HT.left=null}S.hLate=num('sHLate',3,0,20);
+  if($('sHunt').value!==S.hunt){S.hunt=$('sHunt').value;S.hs=[[],[],[],[]];S.hl=[false,false,false,false]}
+  save();if(back==='hunt'){renderHunt();show('hunt')}else{renderBoard();show('board')}
 }
 function fs(){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
 
@@ -576,14 +731,22 @@ document.addEventListener('click',e=>{
   else if(go==='pause')R&&(R.run?pause():resume());
   else if(go==='abort'){if(R){R.run=false;R=null}renderBoard();show('board')}
   else if(go==='mv')move(b.dataset.from,+b.dataset.j);
-  else if(go==='board'){if(cur==='play')return;renderBoard();show('board')}
+  else if(go==='board'){if(cur==='play')return;if(cur==='winner'&&$('wKick').textContent.includes('hunt')){renderHunt();show('hunt');return}if(cur==='setup'&&back==='hunt'){renderHunt();show('hunt');return}renderBoard();show('board')}
   else if(go==='reveal')reveal();
   else if(go==='setup')openSetup();
   else if(go==='saveSetup')saveSetup();
   else if(go==='resetUsed'){S.used=[];save();count()}
-  else if(go==='resetAll'){S.res=[null,null,null,null];S.tb=[null,null,null,null];S.used=[];save();count()}
+  else if(go==='resetAll'){S.res=[null,null,null,null];S.tb=[null,null,null,null];S.used=[];S.hs=[[],[],[],[]];S.hl=[false,false,false,false];save();count()}
   else if(go==='fs')fs();
   else if(go==='mute')setMute(!muted);
+  else if(go==='hunt'){renderHunt();show('hunt')}
+  else if(go==='hstart')hToggle();
+  else if(go==='hreset'){HT.run=false;HT.left=hTot();HT.warned={};$('hMsg').textContent='';paintHunt()}
+  else if(go==='hscore'){renderScore();show('hscore')}
+  else if(go==='htog'){const a=S.hs[i],k=+b.dataset.k,j=a.indexOf(k);j>-1?a.splice(j,1):a.push(k);save();renderScore()}
+  else if(go==='hlate'){S.hl[i]=!S.hl[i];save();renderScore()}
+  else if(go==='hclear'){S.hs=[[],[],[],[]];S.hl=[false,false,false,false];save();renderScore()}
+  else if(go==='hreveal')hReveal();
 });
 $('pAbort').dataset.confirm='Click again to cancel (no score saved)';
 document.addEventListener('input',e=>{if(e.target.id==='sWords'||e.target.id==='sTbW')count()});
@@ -591,6 +754,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.matches('input,textarea')||e.repeat)return;
   const k=e.key.length===1?e.key.toLowerCase():e.key;
   if(cur==='ready'&&[' ','Enter','PageDown','ArrowRight'].includes(k)){e.preventDefault();begin();return}
+  if(cur==='hunt'&&k===' '){e.preventDefault();hToggle();return}
   if(cur==='play'){
     if(['ArrowRight','PageDown','Enter','c'].includes(k)){e.preventDefault();act('c')}
     else if(['ArrowLeft','PageUp','x'].includes(k)){e.preventDefault();act('p')}
@@ -605,11 +769,13 @@ function reveal(){
   const v=verdict();if(v.state!=='win')return;
   const r=v.w.r;$('wTeam').textContent=v.w.n;
   $('wScore').textContent=`${r.c.length} correct`+(v.w.t?` · tie-break ${v.w.t.c.length}`:'');
-  $('wHow').textContent=v.how;
+  $('wHow').textContent=v.how;$('wKick').textContent='And the charades champion is…';
+  confetti();show('winner');
+}
+function confetti(){
   const cols=['#D4AF37','#F3DC8A','#FFFDF6','#1F7A52'];
   $('conf').innerHTML=reduce?'':Array.from({length:90},(_,j)=>`<i style="left:${Math.random()*100}%;background:${cols[j%4]};animation-duration:${3+Math.random()*4}s;animation-delay:${-Math.random()*6}s"></i>`).join('');
   tone(523,.2);setTimeout(()=>tone(659,.2),180);setTimeout(()=>tone(784,.2),360);setTimeout(()=>tone(1047,.5),540);
-  show('winner');
 }
 renderBoard();
 }
