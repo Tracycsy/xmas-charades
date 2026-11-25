@@ -110,6 +110,10 @@ kbd{font:800 12px var(--sans);padding:2px 7px;border-radius:6px;background:rgba(
 .card.ok{animation:ok .45s var(--ease)}
 @keyframes ok{0%{box-shadow:0 0 0 0 rgba(31,122,82,.9),0 18px 0 rgba(78,7,11,.45)}100%{box-shadow:0 0 0 40px rgba(31,122,82,0),0 18px 0 rgba(78,7,11,.45)}}
 .card.skip{animation:skip .35s}
+.card.foul{animation:foul .5s}
+@keyframes foul{0%,100%{box-shadow:0 0 0 0 rgba(255,253,246,0),0 18px 0 rgba(78,7,11,.45)}20%{transform:translateX(-16px);box-shadow:0 0 0 14px rgba(255,253,246,.9),0 18px 0 rgba(78,7,11,.45)}50%{transform:translateX(12px)}80%{transform:translateX(-6px)}}
+.btn.foul{background:var(--ivory);color:var(--red-d);box-shadow:0 6px 0 #C9B99A}
+.fouls{font-weight:900;color:var(--champ);font-size:15px;text-align:right;margin-top:4px}
 @keyframes skip{25%{transform:translateX(-14px)}75%{transform:translateX(10px)}}
 .cat{font-weight:900;font-size:clamp(16px,1.5vw,22px);color:var(--ivory);background:var(--red);padding:7px 18px;border-radius:999px}
 .word{font:400 clamp(64px,10vw,170px)/1 var(--serif);color:var(--red-d);text-wrap:balance;overflow-wrap:anywhere}
@@ -190,6 +194,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
  <symbol id="i-skip" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8V4zM17 5h3v14h-3z"/></symbol>
  <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13"/></symbol>
+ <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
  <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8V4z"/></symbol>
  <symbol id="i-crown" viewBox="0 0 24 24" fill="currentColor"><path d="M2 6l4.5 4L12 3l5.5 7L22 6l-2 12H4L2 6zm2 14h16v2H4z"/></symbol>
@@ -222,7 +227,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
       <div class="rule"><span class="n">1</span>Guessers sit with their backs to the screen</div>
       <div class="rule"><span class="n">2</span>Actors can talk, but never say a word on screen</div>
       <div class="rule"><span class="n">3</span>No spelling or "it starts with C"</div>
-      <div class="rule"><span class="n">4</span>No pointing at a person in the room</div>
+      <div class="rule"><span class="n">4</span>No pointing at a person in the room. Break a rule and it's a foul: no point</div>
       <div class="rule"><span class="n">5</span><span id="rPass"></span></div>
     </div>
     <p class="warn" id="rWarn"></p>
@@ -238,7 +243,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
   <div class="stagebar">
     <div class="who"><img id="pBauble" alt=""><span id="pTeam"></span></div>
     <div class="ring" id="pRing"><svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="52" fill="none" stroke-width="10"/><circle class="arc" id="pArc" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="0"/></svg><div class="t" id="pTime">3:00</div></div>
-    <div class="tally"><div><span class="num" id="pScore">0</span><small>correct</small><div class="passes" id="pPassDots"></div></div></div>
+    <div class="tally"><div><span class="num" id="pScore">0</span><small>correct</small><div class="passes" id="pPassDots"></div><div class="fouls" id="pFouls"></div></div></div>
   </div>
   <div class="stage">
     <div class="card" id="pCard">
@@ -249,6 +254,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
   </div>
   <div class="ctrl">
     <button class="btn ghost-l xl" data-go="pass" id="pPass"><svg><use href="#i-skip"/></svg><span>Pass</span> <kbd>←</kbd></button>
+    <button class="btn foul xl" data-go="foul" style="flex:.8" title="Rule broken: throw out this word, no point"><svg><use href="#i-x"/></svg>Foul <kbd>D</kbd></button>
     <button class="btn green xl" data-go="correct"><svg><use href="#i-check"/></svg>Correct <kbd>→</kbd></button>
   </div>
   <div class="mini">
@@ -267,8 +273,9 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
     <div class="lists">
       <div class="panel"><h3>Correct</h3><div class="chips" id="dC"></div></div>
       <div class="panel"><h3>Passed or not finished</h3><div class="chips" id="dP"></div></div>
+      <div class="panel"><h3>Fouls (no point)</h3><div class="chips" id="dF"></div></div>
     </div>
-    <p class="note">Mis-click? Tap a word to move it to the other list.</p>
+    <p class="note">Mis-click? Tap a word to move it: fouls and passes go to Correct, correct words go to Passed.</p>
     <button class="btn gold" data-go="board">Back to scoreboard</button>
   </div>
 </section>
@@ -554,7 +561,7 @@ function renderBoard(){
       ${lead?`<span class="badge">${ico('crown')}Leading</span>`:''}
       <h2>${esc(n)}</h2>
       ${r?`<div class="score">${r.c.length}</div><div class="unit">correct</div><div class="meter"><i style="width:${top?Math.round(r.c.length/top*100):0}%"></i></div>`:`<div class="score idle">Ready to play</div>`}
-      <div class="meta">${r?`${r.p.length} passed`:''}</div>
+      <div class="meta">${r?`${r.p.length} passed`+(r.f&&r.f.length?` · ${r.f.length} foul${r.f.length>1?'s':''}`:''):''}</div>
       <div class="act">${btn}</div></article>`}).join('');
   const st=$('status');const star=`<svg><use href="#i-star"/></svg>`;
   if(v.state==='playing')st.innerHTML=`${star}<span><b>${v.played} of ${S.names.length}</b> teams have played. Each team gets ${fmt(S.secs)} on the clock.</span>`;
@@ -572,7 +579,7 @@ function deal(pool){const f=shuffle(pool.filter(isFace)),o=shuffle(pool.filter(x
 let R=null,lastSec=null;const CIRC=326.7;
 function prepare(i,tb){
   const used=new Set(S.used),secs=tb?S.tbSecs:S.secs;
-  R={i,tb,secs,deck:deal(parse(tb?S.tbWords:S.words).filter(x=>!used.has(x.w))),cur:null,c:[],p:[],h:[],left:secs*1000,run:false,last:0};
+  R={i,tb,secs,deck:deal(parse(tb?S.tbWords:S.words).filter(x=>!used.has(x.w))),cur:null,c:[],p:[],f:[],h:[],left:secs*1000,run:false,last:0};
   $('rTeam').textContent=S.names[i];$('rBauble').src=baubleSrc(COLORS[i%4]);
   $('rKind').textContent=tb?`Tie-break · ${fmt(secs)} on the clock`:`Up next · ${fmt(secs)} on the clock`;
   $('rPass').textContent=S.passLimit>0?`${S.passLimit} passes allowed`:'Unlimited passes';
@@ -591,7 +598,7 @@ function paint(){
   const s=R.left/1000,low=s<=10;
   $('pTime').textContent=fmt(s);$('pRing').classList.toggle('low',low&&R.run);
   $('pArc').style.strokeDashoffset=(CIRC*(1-Math.max(0,R.left)/(R.secs*1000))).toFixed(1);
-  $('pScore').textContent=R.c.length;
+  $('pScore').textContent=R.c.length;$('pFouls').textContent=R.f.length?`${R.f.length} foul${R.f.length>1?'s':''}`:'';
   const lim=S.passLimit,left=lim-R.p.length;
   $('pPass').disabled=lim>0&&left<=0;
   $('pPass').querySelector('span').textContent=lim>0&&left<=0?'No passes left':'Pass';
@@ -610,18 +617,19 @@ function loop(){
 function act(k){
   if(!R||!R.run||!R.cur)return;
   if(k==='p'&&S.passLimit>0&&R.p.length>=S.passLimit)return;
-  (k==='c'?R.c:R.p).push(R.cur.w);R.h.push({k,card:R.cur});
-  k==='c'?ding():thud();next(k==='c'?'ok':'skip');paint();
+  R[k].push(R.cur.w);R.h.push({k,card:R.cur});
+  if(k==='c')ding();else if(k==='f'){tone(140,.35,'square',.18);setTimeout(()=>tone(110,.4,'square',.18),180)}else thud();
+  next(k==='c'?'ok':k==='f'?'foul':'skip');paint();
 }
 function undo(){
   if(!R||!R.h.length||R.left<=0)return;
-  const last=R.h.pop();(last.k==='c'?R.c:R.p).pop();
+  const last=R.h.pop();R[last.k].pop();
   if(R.cur){R.deck.unshift(R.cur);const j=S.used.lastIndexOf(R.cur.w);if(j>-1)S.used.splice(j,1)}
   R.cur=last.card;drawCard('pop');paint();save();
 }
 function finish(){
   R.run=false;R.left=0;paint();buzz();
-  const rec={c:R.c.slice(),p:R.p.slice()};if(R.cur)rec.p.push(R.cur.w);
+  const rec={c:R.c.slice(),p:R.p.slice(),f:R.f.slice()};if(R.cur)rec.p.push(R.cur.w);
   if(R.tb)S.tb[R.i]=rec;else S.res[R.i]=rec;
   save();showDone();
 }
@@ -637,10 +645,11 @@ function showDone(){
 function chips(rec){
   $('dC').innerHTML=rec.c.map((w,j)=>`<button class="chip c" data-go="mv" data-from="c" data-j="${j}">${esc(w)}</button>`).join('')||'<span class="note">None</span>';
   $('dP').innerHTML=rec.p.map((w,j)=>`<button class="chip" data-go="mv" data-from="p" data-j="${j}">${esc(w)}</button>`).join('')||'<span class="note">None</span>';
+  $('dF').innerHTML=(rec.f||[]).map((w,j)=>`<button class="chip" data-go="mv" data-from="f" data-j="${j}">${esc(w)}</button>`).join('')||'<span class="note">None</span>';
   $('dNum').textContent=rec.c.length;
 }
 function move(from,j){
-  const rec=R.tb?S.tb[R.i]:S.res[R.i];const a=from==='c'?rec.c:rec.p,b=from==='c'?rec.p:rec.c;
+  const rec=R.tb?S.tb[R.i]:S.res[R.i];rec.f=rec.f||[];const a=rec[from],b=from==='c'?rec.p:rec.c;
   b.push(a.splice(j,1)[0]);save();chips(rec);
 }
 
@@ -736,6 +745,7 @@ document.addEventListener('click',e=>{
   else if(go==='begin')begin();
   else if(go==='correct')act('c');
   else if(go==='pass')act('p');
+  else if(go==='foul')act('f');
   else if(go==='undo')undo();
   else if(go==='pause')R&&(R.run?pause():resume());
   else if(go==='abort'){if(R){R.run=false;R=null}renderBoard();show('board')}
@@ -767,6 +777,7 @@ document.addEventListener('keydown',e=>{
   if(cur==='play'){
     if(['ArrowRight','PageDown','Enter','c'].includes(k)){e.preventDefault();act('c')}
     else if(['ArrowLeft','PageUp','x'].includes(k)){e.preventDefault();act('p')}
+    else if(['d','ArrowDown'].includes(k)){e.preventDefault();act('f')}
     else if(['Backspace','z'].includes(k)){e.preventDefault();undo()}
     else if(k==='Escape'){e.preventDefault();pause()}
     else if([' ','p','.','b'].includes(k)){e.preventDefault();R&&(R.run?pause():resume())}
