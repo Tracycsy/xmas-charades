@@ -360,7 +360,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
       <label>Passes allowed (0 = unlimited)<input type="number" id="sPass" min="0" max="20"></label>
     </div>
     <div class="two">
-      <label>Words: one per line as Category | Word, 1 or 2 words each. "Famous faces" are mixed into every team's set. Lines starting with # are ignored.<textarea id="sWords" spellcheck="false"></textarea></label>
+      <label>Words: one per line as Category | Word, kept short. "Famous faces" are mixed into every team's set. Lines starting with # are ignored.<textarea id="sWords" spellcheck="false"></textarea></label>
     </div>
     <p class="note" id="sCount"></p>
     <h2 class="setup-h">Scavenger hunt</h2>
@@ -379,79 +379,69 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
 <script>
 {
 const KEY='gio-gto-charades-2026-v2';
-const DEF_WORDS=`# One or two words only. Add your own in the same format, e.g.  Our people | (leader's name)
-# Good ones: your leaders' names, the AI tools the team built, the company slogan
+const DEF_WORDS=`# One per line as Category | Word
 # "Famous faces" are mixed into every team's set: about one card in three.
-Our people | Xinfa
-Our people | Czarina
 Famous faces | Donald Trump
 Famous faces | Elon Musk
 Famous faces | Jensen Huang
 Famous faces | Taylor Swift
 Famous faces | Jackie Chan
 Famous faces | Bruce Lee
-Famous faces | Stephen Chow
-Famous faces | Andy Lau
-Famous faces | Mark Zuckerberg
 Famous faces | Michael Jackson
 Famous faces | Mr Bean
 Famous faces | Cristiano Ronaldo
-Famous faces | Lionel Messi
-Famous faces | Usain Bolt
-Famous faces | Barack Obama
+Famous faces | Salt Bae
 Famous faces | Steve Jobs
-Famous faces | Bill Gates
-Famous faces | Gordon Ramsay
 Famous faces | Lady Gaga
-Famous faces | Elvis Presley
-Famous faces | Charlie Chaplin
-Famous faces | Sam Altman
-Famous faces | Jay Chou
+Famous faces | Andy Lau
 Famous faces | Mariah Carey
 Famous faces | Tom Cruise
-Famous faces | Psy
+Famous faces | BLACKPINK
 Christmas | Santa Claus
-Christmas | Melting snowman
-Christmas | Sneezing reindeer
-Christmas | Angry elf
-Christmas | Tangled lights
-Christmas | Escaping turkey
+Christmas | Snowman
+Christmas | Reindeer
+Christmas | Christmas tree
+Christmas | Jingle Bells
+Christmas | Turkey
 Christmas | Ugly sweater
 Christmas | Snow angel
 Christmas | Snowball fight
-Christmas | Ice skating
-Christmas | Gift wrapping
+Christmas | Elf
+Christmas | Gift
 Christmas | Candy cane
 Christmas | Gingerbread man
-Christmas | Sleigh ride
 Christmas | Christmas carol
 Christmas | Hot chocolate
-Office life | Printer jam
+Christmas | Mulled wine
+Christmas | Silent Night
 Office life | Reply all
 Office life | On mute
-Office life | Monday morning
-Office life | Deadline panic
-Office life | Power nap
+Office life | Deadline
+Office life | Stubbs
 Office life | Coffee break
-Office life | Microwave queue
-Office life | Zoom call
-Office life | Payday
+Office life | Shuttle bus
+Office life | Meeting
+Office life | Pantry
+Office life | Workday
 Office life | Annual leave
-Office life | Overtime
+Office life | Overtime (OT)
+Office life | Healthier, Longer, Better Lives
+Office life | Xinfa
+Office life | Biswa
+Office life | Lee Yuan Siong (LYS)
 Hong Kong | MTR
 Hong Kong | Typhoon
 Hong Kong | Octopus card
 Hong Kong | Milk tea
 Hong Kong | Egg waffle
 Hong Kong | Mahjong
-Hong Kong | Lion dance
 Hong Kong | Dim sum
-Hong Kong | Peak Tram
 Hong Kong | Pineapple bun
 Hong Kong | Red minibus
-Movies and songs | Home Alone
+Hong Kong | Siu Mai
+Movies and songs | Avengers
 Movies and songs | Frozen
-Movies and songs | The Grinch
+Movies and songs | The Godfather
 Movies and songs | Titanic
 Movies and songs | Jurassic Park
 Movies and songs | Spider-Man
@@ -459,17 +449,38 @@ Movies and songs | Lion King
 Movies and songs | Squid Game
 Movies and songs | Gangnam Style
 Movies and songs | Baby Shark
-Movies and songs | YMCA
-Movies and songs | Macarena
+Movies and songs | All I Want for Christmas Is You
+Movies and songs | Iron Man
+Movies and songs | James Bond
+Movies and songs | Mission Impossible
+Movies and songs | Star Wars
+Movies and songs | Harry Potter
+Movies and songs | Hulk
+Movies and songs | Lord of the Rings
+Movies and songs | Avatar
 AI and tech | ChatGPT
 AI and tech | Claude
 AI and tech | Chatbot
-AI and tech | Robot dance
+AI and tech | Gemini
+AI and tech | Grok
+AI and tech | Meta Muse (Muse)
 AI and tech | Copy paste
-AI and tech | Password reset
-AI and tech | Deepfake
-AI and tech | Blue screen
-AI and tech | Selfie`;
+AI and tech | Password
+AI and tech | GenAI Hub
+AI and tech | DaVinci
+AI and tech | AI Roleplay
+AI and tech | Sales Control Tower
+AI and tech | Copilot
+Sports | Snowboard
+Sports | Tennis
+Sports | Pickleball
+Sports | Badminton
+Sports | Formula 1 (F1)
+Sports | Ski
+Sports | Basketball
+Sports | Snooker
+Sports | Table tennis
+Sports | Football`;
 const DEF_TB=`Famous faces | Freddie Mercury
 Famous faces | Albert Einstein
 Famous faces | Beyonce
@@ -479,29 +490,34 @@ Tie-break | Falling tree
 Tie-break | Elf selfie
 Tie-break | Robot waiter`;
 const DEF_HUNT=`# One per line: Basket or Photo | item | points
-Basket | A GIO staff pass and a GTO staff pass | 2
-Basket | A business card | 1
+Basket | 2 staff cards | 2
+Basket | 2 credit cards | 2
 Basket | An Octopus card | 1
-Basket | A $10 coin | 1
+Basket | A business card | 1
+Basket | A tissue | 1
 Basket | A receipt dated December 2026 | 1
 Basket | A lipstick or lip balm | 1
 Basket | A hand cream | 1
 Basket | A pen | 1
+Basket | An earring | 1
+Basket | A bracelet | 1
 Basket | A hair tie | 1
-Basket | Earphones | 1
-Basket | A power bank or charging cable | 1
+Basket | A pair of earphones | 1
+Basket | 3 phone cases | 1
 Basket | Something red | 1
-Basket | A sock (yes, off a foot) | 2
-Basket | Something starting with X (for Xinfa) | 2
-Photo | Team photo: 2 people in reindeer antlers and 2 in Santa hats | 3
-Photo | 3 people in Christmas glasses doing their best snowman pose | 3
-Photo | Selfie with Xinfa, both wearing a Christmas prop | 3
-Photo | Human Christmas tree: whole team, every person wearing a prop | 3
-Photo | Video: whole team in props singing 10 seconds of a Christmas song | 3`;
+Basket | Something green | 2
+Basket | 1 iPhone + 1 Android phone | 2
+Basket | 3 watches | 3
+Photo | 2 in reindeer antlers, 2 in Santa hats | 3
+Photo | 3 in Christmas glasses, snowman pose | 3
+Photo | Selfie with Xinfa: 3 teammates + Xinfa, all in props | 4
+Photo | Human Christmas tree (3 people) with a snowman on each side | 4
+Photo | Video: whole team in props singing a Christmas song for 10 seconds | 5`;
+const VER=4;
 const COLORS=['#B5121B','#D5DDE0','#D4AF37','#0F5C3B'];
-const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:3,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null],hMin:10,hLate:3,hunt:DEF_HUNT,hs:[[],[],[],[]],hl:[false,false,false,false]});
+const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:3,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null],hMin:10,hLate:3,hunt:DEF_HUNT,hs:[[],[],[],[]],hl:[false,false,false,false],ver:VER});
 let S=fresh();
-try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.names))S=Object.assign(fresh(),s)}catch(e){}
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.names)){if(s.ver!==VER){s.words=DEF_WORDS;s.hunt=DEF_HUNT;s.used=[];s.hs=[[],[],[],[]];s.hl=[false,false,false,false];s.ver=VER}S=Object.assign(fresh(),s)}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
