@@ -169,7 +169,23 @@ table.sct{width:100%;border-collapse:collapse;color:var(--ivory)}
 .tick svg{width:22px;height:22px}
 .setup-h{margin:6px 0 0;font:400 28px var(--serif);color:var(--gold-s)}
 @media(max-width:900px){.hgrid{grid-template-columns:1fr}.hitems{grid-template-columns:1fr}}
-/* setup */
+/* lucky draw */
+.dgrid{flex:1;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:clamp(14px,1.6vw,26px);align-items:stretch}
+.dstage{position:relative;background:linear-gradient(180deg,var(--ivory),var(--champ));color:var(--ink);border-radius:30px;padding:clamp(18px,3vw,44px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;box-shadow:0 16px 0 rgba(78,7,11,.4),0 34px 70px rgba(0,0,0,.32);min-height:clamp(300px,52vh,560px)}
+.prize-in{font:900 clamp(16px,1.5vw,22px) var(--sans);color:var(--ivory);background:var(--red);border:0;border-radius:999px;padding:8px 20px;text-align:center;width:min(360px,90%)}
+.prize-in:focus{outline:3px solid var(--gold)}
+.dname{font:400 clamp(54px,8vw,140px)/1.02 var(--serif);color:var(--red-d);text-wrap:balance;overflow-wrap:anywhere;min-height:1.1em}
+.dname.spin{color:var(--mute);filter:blur(.5px)}
+.dname.win{animation:pop .5s var(--ease)}
+.dhint{color:var(--mute);font-weight:800}
+.dside{display:flex;flex-direction:column;gap:12px;padding:clamp(14px,1.6vw,24px);border-radius:26px;background:rgba(78,7,11,.35);border:1px solid var(--line);min-height:0}
+.pool{font-weight:900;font-size:clamp(18px,1.5vw,22px)}
+.pool b{color:var(--gold-s);font-size:1.4em}
+.wins{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;overflow:auto;max-height:34vh}
+.wins li{display:flex;gap:10px;align-items:baseline;padding:8px 12px;border-radius:12px;background:rgba(255,253,246,.1);border:1px solid var(--line);font-weight:800}
+.wins li span{color:var(--gold-s);font-size:14px;flex:none}
+.drawer textarea{min-height:200px}
+
 .sheet{background:rgba(78,7,11,.45);border:1px solid var(--line);border-radius:22px;padding:clamp(16px,2vw,26px);display:flex;flex-direction:column;gap:16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
 label{display:flex;flex-direction:column;gap:6px;font-weight:800;color:var(--champ)}
@@ -195,6 +211,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
  <symbol id="i-skip" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8V4zM17 5h3v14h-3z"/></symbol>
  <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13"/></symbol>
  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+ <symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8S10 3 7.5 4.5 9 8 12 8zm0 0s2-5 4.5-3.5S15 8 12 8z"/></symbol>
  <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8V4z"/></symbol>
  <symbol id="i-crown" viewBox="0 0 24 24" fill="currentColor"><path d="M2 6l4.5 4L12 3l5.5 7L22 6l-2 12H4L2 6zm2 14h16v2H4z"/></symbol>
@@ -205,10 +222,11 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
   <div class="top">
     <div>
       <h1>Christmas <em>Charades</em></h1>
-      <p class="sub">GIO &amp; GTO Christmas Lunch · 4 December 2026</p>
+      <p class="sub">GIO Christmas Lunch · 4 December 2026</p>
     </div>
     <div class="tools">
       <button class="ib" data-go="hunt"><svg><use href="#i-star"/></svg>Scavenger hunt</button>
+      <button class="ib" data-go="draw"><svg><use href="#i-gift"/></svg>Lucky draw</button>
       <button class="ib" data-go="fs" aria-label="Full screen"><svg><use href="#i-max"/></svg>Full screen <kbd>F</kbd></button>
       <button class="ib" data-go="mute" id="mute" aria-label="Toggle sound"><svg><use href="#i-vol"/></svg><span>Sound on</span></button>
       <button class="ib" data-go="setup" aria-label="Setup"><svg><use href="#i-set"/></svg>Setup</button>
@@ -302,6 +320,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
     <div class="tools">
       <button class="ib" data-go="board"><svg><use href="#i-play"/></svg>Charades</button>
       <button class="ib" data-go="hscore"><svg><use href="#i-check"/></svg>Score teams</button>
+      <button class="ib" data-go="draw"><svg><use href="#i-gift"/></svg>Lucky draw</button>
       <button class="ib" data-go="fs" aria-label="Full screen"><svg><use href="#i-max"/></svg>Full screen</button>
       <button class="ib" data-go="setup"><svg><use href="#i-set"/></svg>Setup</button>
     </div>
@@ -332,6 +351,46 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
     <div class="scroll"><table class="sct" id="hTable"></table></div>
     <p class="note">Tap a box to tick an item for that team. Tie on points? Rock, paper, scissors decides.</p>
     <div class="tools"><button class="btn ghost-l" data-go="hclear" data-confirm="Click again to clear all ticks">Clear all ticks</button></div>
+  </div>
+</section>
+
+<section class="screen" id="draw">
+  <div class="top">
+    <div>
+      <h1>Lucky <em>draw</em></h1>
+      <p class="sub">Every name in the room is in the draw · each person can win once</p>
+    </div>
+    <div class="tools">
+      <button class="ib" data-go="board"><svg><use href="#i-play"/></svg>Charades</button>
+      <button class="ib" data-go="hunt"><svg><use href="#i-star"/></svg>Scavenger hunt</button>
+      <button class="ib" data-go="dnames"><svg><use href="#i-set"/></svg>Edit names</button>
+      <button class="ib" data-go="fs" aria-label="Full screen"><svg><use href="#i-max"/></svg>Full screen</button>
+    </div>
+  </div>
+  <div class="dgrid">
+    <div class="dstage">
+      <label class="dhint" for="dPrize" style="margin-bottom:-8px">Drawing for</label>
+      <input class="prize-in" id="dPrize" aria-label="Prize being drawn">
+      <div class="dname" id="dName" aria-live="polite"></div>
+      <p class="dhint" id="dHint"></p>
+      <div class="actions">
+        <button class="btn gold xl" style="flex:none" data-go="ddraw" id="dDraw"><svg><use href="#i-gift"/></svg>Draw a winner <kbd>Space</kbd></button>
+        <button class="btn ghost" data-go="dabsent" id="dAbsent" hidden>Not here? Draw again</button>
+      </div>
+    </div>
+    <aside class="dside">
+      <div class="pool"><b id="dPool">0</b> names in the draw</div>
+      <h3 class="setup-h" style="font-size:24px;margin:0">Winners</h3>
+      <ol class="wins" id="dWins"></ol>
+      <div class="tools" style="margin-top:auto">
+        <button class="ib" data-go="dundo" data-confirm="Click again to undo the last winner">Undo last</button>
+        <button class="ib" data-go="dreset" data-confirm="Click again: winners go back in the draw">Start over</button>
+      </div>
+    </aside>
+  </div>
+  <div class="sheet drawer" id="dDrawer" hidden>
+    <label>Names in the draw: one per line. Remove anyone who isn't here, add anyone who is. Winners stay out of the draw.<textarea id="dNames" spellcheck="false" placeholder="Paste the attendee names here, one per line"></textarea></label>
+    <div class="tools"><button class="btn gold" data-go="dsave">Save names</button><button class="btn ghost-l" data-go="dnames">Close</button><span class="note" id="dCount"></span></div>
   </div>
 </section>
 
@@ -516,7 +575,7 @@ Photo | Human Christmas tree (3 people) with a snowman on each side | 4
 Photo | Video: whole team in props singing a Christmas song for 10 seconds | 5`;
 const VER=4;
 const COLORS=['#B5121B','#D5DDE0','#D4AF37','#0F5C3B'];
-const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:5,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null],hMin:10,hLate:3,hunt:DEF_HUNT,hs:[[],[],[],[]],hl:[false,false,false,false],ver:VER});
+const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:5,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null],hMin:10,hLate:3,hunt:DEF_HUNT,hs:[[],[],[],[]],hl:[false,false,false,false],ver:VER,dn:'',dw:[],dx:[]});
 let S=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.names)){if(s.ver!==VER){s.words=DEF_WORDS;s.hunt=DEF_HUNT;s.used=[];s.hs=[[],[],[],[]];s.hl=[false,false,false,false];s.ver=VER}if(!s.v5){s.passLimit=5;s.v5=1}S=Object.assign(fresh(),s)}}catch(e){}
 S.v5=1;
@@ -552,14 +611,9 @@ function tone(f,d,type,v){if(muted)return;try{ac=ac||new(window.AudioContext||wi
 const ding=()=>{tone(880,.15);setTimeout(()=>tone(1320,.3),90)};
 const thud=()=>tone(170,.22,'triangle',.3);
 const tick=()=>tone(700,.08,'square',.07);
-function buzz(){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const t0=ac.currentTime,out=ac.createGain();out.gain.value=.9;out.connect(ac.destination);
-  const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1400;lp.connect(out);
-  [196,247,294].forEach((f,k)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f,t0);o.frequency.linearRampToValueAtTime(f*.94,t0+2.3);
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.12,t0+.06);g.gain.setValueAtTime(.12,t0+1.5);g.gain.exponentialRampToValueAtTime(.001,t0+2.5);o.connect(g).connect(lp);o.start(t0);o.stop(t0+2.55)});
-  const n=ac.createBuffer(1,ac.sampleRate*.08,ac.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
-  for(let t=0;t<2.4;t+=.09+Math.random()*.06){const src=ac.createBufferSource(),bp=ac.createBiquadFilter(),g=ac.createGain();src.buffer=n;bp.type='bandpass';bp.frequency.value=5500+Math.random()*2500;bp.Q.value=2;
-    g.gain.setValueAtTime(.35*(1-t/2.6),t0+t);g.gain.exponentialRampToValueAtTime(.001,t0+t+.08);src.connect(bp).connect(g).connect(out);src.start(t0+t)}
-  [2637,3136,2637,3520].forEach((f,k)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=f;const st=t0+.15+k*.5;g.gain.setValueAtTime(.08,st);g.gain.exponentialRampToValueAtTime(.001,st+.45);o.connect(g).connect(out);o.start(st);o.stop(st+.5)});
+function buzz(){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const t0=ac.currentTime,out=ac.createGain();out.gain.value=.5;out.connect(ac.destination);
+  for(let g=0;g<5;g++)for(let k=0;k<4;k++){const st=t0+g*.5+k*.1,o=ac.createOscillator(),v=ac.createGain();o.type='square';o.frequency.value=g%2?2093:1976;
+    v.gain.setValueAtTime(0,st);v.gain.linearRampToValueAtTime(.22,st+.005);v.gain.setValueAtTime(.22,st+.06);v.gain.linearRampToValueAtTime(0,st+.07);o.connect(v).connect(out);o.start(st);o.stop(st+.08)}
 }catch(e){}}
 function setMute(m){muted=m;$('mute').innerHTML=`<svg><use href="#i-${m?'mute':'vol'}"/></svg><span>${m?'Sound off':'Sound on'}</span>`}
 
@@ -725,6 +779,39 @@ function hReveal(){
   crown('h',w[0],'');
 }
 
+/* lucky draw: names live only in this browser */
+const dList=()=>[...new Set(S.dn.split('\n').map(x=>x.trim()).filter(Boolean))];
+const dPool=()=>{const out=new Set([...S.dw.map(w=>w.n),...S.dx]);return dList().filter(n=>!out.has(n))};
+const prizeName=k=>['3rd prize','2nd prize','1st prize'][k]||'Bonus prize';
+let DS=false;
+function renderDraw(){
+  const pool=dPool();$('dPool').textContent=pool.length;
+  $('dWins').innerHTML=S.dw.map(w=>`<li><span>${esc(w.p)}</span>${esc(w.n)}</li>`).join('')||'<li class="note" style="font-weight:700">No winners yet</li>';
+  if(!DS){$('dPrize').value=prizeName(S.dw.length);
+    if(!dList().length){$('dName').textContent='';$('dHint').textContent='Add the names first: click Edit names and paste the list.'}
+    else if(!S.dw.length){$('dName').textContent='Ready?';$('dHint').textContent=`${pool.length} names in the draw`}}
+  $('dDraw').disabled=DS||!pool.length;
+}
+function dDraw(){
+  const pool=dPool();if(DS||!pool.length)return;
+  const prize=$('dPrize').value.trim()||prizeName(S.dw.length);
+  const win=pool[Math.floor(Math.random()*pool.length)];
+  DS=true;$('dAbsent').hidden=true;$('dHint').textContent='';renderDraw();
+  const el=$('dName');el.classList.remove('win');el.classList.add('spin');
+  const total=reduce?0:3200;let t=0,step=50;
+  const roll=()=>{if(t>=total){el.classList.remove('spin');el.textContent=win;void el.offsetWidth;el.classList.add('win');
+      S.dw.push({n:win,p:prize});save();DS=false;$('dHint').textContent=`${prize} · congratulations!`;$('dAbsent').hidden=false;
+      tone(523,.2);setTimeout(()=>tone(659,.2),180);setTimeout(()=>tone(784,.2),360);setTimeout(()=>tone(1047,.5),540);
+      confettiBurst();renderDraw();return}
+    el.textContent=pool[Math.floor(Math.random()*pool.length)];tone(1200,.03,'square',.05);t+=step;step=Math.min(260,step*1.07);setTimeout(roll,step)};
+  roll();
+}
+function confettiBurst(){if(reduce)return;const c=document.createElement('div');c.className='conf';const cols=['#D4AF37','#F3DC8A','#FFFDF6','#1F7A52'];
+  c.innerHTML=Array.from({length:70},(_,j)=>`<i style="left:${Math.random()*100}%;background:${cols[j%4]};animation-duration:${2.5+Math.random()*2.5}s;animation-iteration-count:1;animation-delay:${Math.random()*.6}s"></i>`).join('');
+  document.body.appendChild(c);setTimeout(()=>c.remove(),6000)}
+function dNamesOpen(){const d=$('dDrawer');d.hidden=!d.hidden;if(!d.hidden){$('dNames').value=S.dn;dCount();$('dNames').focus()}}
+function dCount(){const n=[...new Set($('dNames').value.split('\n').map(x=>x.trim()).filter(Boolean))].length;$('dCount').textContent=`${n} names`}
+
 /* ties: rock, paper, scissors */
 let TIE=null;
 function showTie(g,idx){TIE={g,idx};$('tNames').textContent=idx.map(i=>S.names[i]).join(' vs ');
@@ -792,14 +879,22 @@ document.addEventListener('click',e=>{
   else if(go==='hlate'){S.hl[i]=!S.hl[i];save();renderScore()}
   else if(go==='hclear'){S.hs=[[],[],[],[]];S.hl=[false,false,false,false];save();renderScore()}
   else if(go==='hreveal')hReveal();
+  else if(go==='draw'){renderDraw();show('draw')}
+  else if(go==='ddraw')dDraw();
+  else if(go==='dabsent'){const w=S.dw.pop();if(w){S.dx.push(w.n);save()}$('dAbsent').hidden=true;$('dHint').textContent=`${w?w.n:''} is not here. Drawing again for the same prize.`;renderDraw();if(w)$('dPrize').value=w.p;}
+  else if(go==='dundo'){S.dw.pop();save();$('dAbsent').hidden=true;$('dName').textContent='';renderDraw()}
+  else if(go==='dreset'){S.dw=[];S.dx=[];save();$('dAbsent').hidden=true;$('dName').textContent='';renderDraw()}
+  else if(go==='dnames')dNamesOpen();
+  else if(go==='dsave'){S.dn=$('dNames').value;save();$('dDrawer').hidden=true;renderDraw()}
 });
 $('pAbort').dataset.confirm='Click again to cancel (no score saved)';
-document.addEventListener('input',e=>{if(e.target.id==='sWords')count()});
+document.addEventListener('input',e=>{if(e.target.id==='sWords')count();if(e.target.id==='dNames')dCount()});
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,textarea')||e.repeat)return;
   const k=e.key.length===1?e.key.toLowerCase():e.key;
   if(cur==='ready'&&[' ','Enter','PageDown','ArrowRight'].includes(k)){e.preventDefault();begin();return}
   if(cur==='hunt'&&k===' '){e.preventDefault();hToggle();return}
+  if(cur==='draw'&&k===' '){e.preventDefault();dDraw();return}
   if(cur==='play'){
     if(['ArrowRight','PageDown','Enter','c'].includes(k)){e.preventDefault();act('c')}
     else if(['ArrowLeft','PageUp','x'].includes(k)){e.preventDefault();act('p')}
