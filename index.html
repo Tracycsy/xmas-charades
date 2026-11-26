@@ -75,11 +75,11 @@ kbd{font:800 12px var(--sans);padding:2px 7px;border-radius:6px;background:rgba(
 .wide{width:100%}
 .actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
 /* ready */
-.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:clamp(14px,2.4vh,26px)}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:clamp(10px,1.8vh,22px)}
 .kicker{color:var(--gold-s);font-weight:900;font-size:clamp(18px,1.6vw,24px)}
-.big-name{font:400 clamp(56px,7.5vw,120px)/1 var(--serif);color:var(--ivory);text-shadow:0 4px 0 rgba(0,0,0,.2)}
-.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;width:min(1400px,100%)}
-.rule{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;background:rgba(255,253,246,.1);border:1px solid var(--line);text-align:left;font-size:clamp(17px,1.4vw,21px);font-weight:800}
+.big-name{font:400 clamp(48px,6vw,100px)/1 var(--serif);color:var(--ivory);text-shadow:0 4px 0 rgba(0,0,0,.2)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:12px;width:min(1400px,100%)}
+.rule{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:18px;background:rgba(255,253,246,.1);border:1px solid var(--line);text-align:left;font-size:clamp(17px,1.4vw,21px);font-weight:800}
 .rule span.n{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:900}
 .warn{color:var(--gold-s);font-weight:900}
 /* play */
@@ -221,17 +221,18 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
 <section class="screen" id="ready">
   <div class="center">
     <p class="kicker" id="rKind"></p>
-    <img id="rBauble" alt="" style="width:clamp(70px,6vw,96px)">
+    <img id="rBauble" alt="" style="width:clamp(50px,4vw,70px)">
     <div class="big-name" id="rTeam"></div>
     <div class="rules">
-      <div class="rule"><span class="n">1</span>Guessers sit with their backs to the screen</div>
-      <div class="rule"><span class="n">2</span>Actors can talk, but never say a word on screen</div>
-      <div class="rule"><span class="n">3</span>No spelling or "it starts with C"</div>
-      <div class="rule"><span class="n">4</span>No pointing at a person in the room. Break a rule and it's a foul: no point</div>
-      <div class="rule"><span class="n">5</span><span id="rPass"></span></div>
+      <div class="rule"><span class="n">1</span>2 actors act it out, 2 guessers guess</div>
+      <div class="rule"><span class="n">2</span>Guessers sit with their backs to the screen</div>
+      <div class="rule"><span class="n">3</span>Actors can talk and act, but can't say any word on the screen</div>
+      <div class="rule"><span class="n">4</span>No spelling, no letter hints, no pointing at the person</div>
+      <div class="rule"><span class="n">5</span>Break a rule and it's a foul: that word is out, no point</div>
+      <div class="rule"><span class="n">6</span><span id="rPass"></span></div>
     </div>
     <p class="warn" id="rWarn"></p>
-    <p class="sub">Presenter clicker works: forward = correct, back = pass.</p>
+    <p class="sub">Clicker: forward = correct, back = pass. Keyboard D = foul.</p>
     <div class="actions">
       <button class="btn gold xl" style="flex:none" data-go="begin"><svg><use href="#i-play"/></svg>Start the clock <kbd>Space</kbd></button>
       <button class="btn ghost-l" data-go="board">Back</button>
@@ -515,9 +516,10 @@ Photo | Human Christmas tree (3 people) with a snowman on each side | 4
 Photo | Video: whole team in props singing a Christmas song for 10 seconds | 5`;
 const VER=4;
 const COLORS=['#B5121B','#D5DDE0','#D4AF37','#0F5C3B'];
-const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:3,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null],hMin:10,hLate:3,hunt:DEF_HUNT,hs:[[],[],[],[]],hl:[false,false,false,false],ver:VER});
+const fresh=()=>({names:['Team Rudolph','Team Frosty','Team Jingle','Team Elf'],secs:180,passLimit:5,tbSecs:60,words:DEF_WORDS,tbWords:DEF_TB,used:[],res:[null,null,null,null],tb:[null,null,null,null],hMin:10,hLate:3,hunt:DEF_HUNT,hs:[[],[],[],[]],hl:[false,false,false,false],ver:VER});
 let S=fresh();
-try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.names)){if(s.ver!==VER){s.words=DEF_WORDS;s.hunt=DEF_HUNT;s.used=[];s.hs=[[],[],[],[]];s.hl=[false,false,false,false];s.ver=VER}S=Object.assign(fresh(),s)}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.names)){if(s.ver!==VER){s.words=DEF_WORDS;s.hunt=DEF_HUNT;s.used=[];s.hs=[[],[],[],[]];s.hl=[false,false,false,false];s.ver=VER}if(!s.v5){s.passLimit=5;s.v5=1}S=Object.assign(fresh(),s)}}catch(e){}
+S.v5=1;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -550,7 +552,15 @@ function tone(f,d,type,v){if(muted)return;try{ac=ac||new(window.AudioContext||wi
 const ding=()=>{tone(880,.15);setTimeout(()=>tone(1320,.3),90)};
 const thud=()=>tone(170,.22,'triangle',.3);
 const tick=()=>tone(700,.08,'square',.07);
-const buzz=()=>{tone(110,1,'sawtooth',.3);tone(116,1,'sawtooth',.2)};
+function buzz(){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const t0=ac.currentTime,out=ac.createGain();out.gain.value=.9;out.connect(ac.destination);
+  const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1400;lp.connect(out);
+  [196,247,294].forEach((f,k)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f,t0);o.frequency.linearRampToValueAtTime(f*.94,t0+2.3);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.12,t0+.06);g.gain.setValueAtTime(.12,t0+1.5);g.gain.exponentialRampToValueAtTime(.001,t0+2.5);o.connect(g).connect(lp);o.start(t0);o.stop(t0+2.55)});
+  const n=ac.createBuffer(1,ac.sampleRate*.08,ac.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
+  for(let t=0;t<2.4;t+=.09+Math.random()*.06){const src=ac.createBufferSource(),bp=ac.createBiquadFilter(),g=ac.createGain();src.buffer=n;bp.type='bandpass';bp.frequency.value=5500+Math.random()*2500;bp.Q.value=2;
+    g.gain.setValueAtTime(.35*(1-t/2.6),t0+t);g.gain.exponentialRampToValueAtTime(.001,t0+t+.08);src.connect(bp).connect(g).connect(out);src.start(t0+t)}
+  [2637,3136,2637,3520].forEach((f,k)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=f;const st=t0+.15+k*.5;g.gain.setValueAtTime(.08,st);g.gain.exponentialRampToValueAtTime(.001,st+.45);o.connect(g).connect(out);o.start(st);o.stop(st+.5)});
+}catch(e){}}
 function setMute(m){muted=m;$('mute').innerHTML=`<svg><use href="#i-${m?'mute':'vol'}"/></svg><span>${m?'Sound off':'Sound on'}</span>`}
 
 /* results */
@@ -598,7 +608,7 @@ function prepare(i,tb){
   R={i,tb,secs,deck:deal(parse(tb?S.tbWords:S.words).filter(x=>!used.has(x.w))),cur:null,c:[],p:[],f:[],h:[],left:secs*1000,run:false,last:0};
   $('rTeam').textContent=S.names[i];$('rBauble').src=baubleSrc(COLORS[i%4]);
   $('rKind').textContent=tb?`Tie-break · ${fmt(secs)} on the clock`:`Up next · ${fmt(secs)} on the clock`;
-  $('rPass').textContent=S.passLimit>0?`${S.passLimit} passes allowed`:'Unlimited passes';
+  $('rPass').textContent=S.passLimit>0?`Stuck? Pass. Up to ${S.passLimit} passes per team`:'Stuck? Pass as often as you like';
   $('rWarn').textContent=R.deck.length<20?`Only ${R.deck.length} unused words left. Add more in Setup.`:'';
   show('ready');
 }
@@ -739,7 +749,7 @@ function count(){const n=parse($('sWords').value).length,u=parse($('sWords').val
 function saveSetup(){
   S.names=S.names.map((n,i)=>($('sN'+i).value.trim()||n));
   const num=(id,d,lo,hi)=>{const v=parseInt($(id).value,10);return isNaN(v)?d:Math.min(hi,Math.max(lo,v))};
-  S.secs=num('sSecs',180,30,600);S.passLimit=num('sPass',3,0,20);
+  S.secs=num('sSecs',180,30,600);S.passLimit=num('sPass',5,0,20);
   S.words=$('sWords').value;
   const hm=num('sHMin',10,1,30);if(hm!==S.hMin&&!HT.run){S.hMin=hm;HT.left=null}S.hLate=num('sHLate',3,0,20);
   if($('sHunt').value!==S.hunt){S.hunt=$('sHunt').value;S.hs=[[],[],[],[]];S.hl=[false,false,false,false]}
