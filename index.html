@@ -170,14 +170,28 @@ table.sct{width:100%;border-collapse:collapse;color:var(--ivory)}
 .setup-h{margin:6px 0 0;font:400 28px var(--serif);color:var(--gold-s)}
 @media(max-width:900px){.hgrid{grid-template-columns:1fr}.hitems{grid-template-columns:1fr}}
 /* lucky draw */
-.dgrid{flex:1;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:clamp(14px,1.6vw,26px);align-items:stretch}
-.dstage{position:relative;background:linear-gradient(180deg,var(--ivory),var(--champ));color:var(--ink);border-radius:30px;padding:clamp(18px,3vw,44px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;box-shadow:0 16px 0 rgba(78,7,11,.4),0 34px 70px rgba(0,0,0,.32);min-height:clamp(300px,52vh,560px)}
+.dgrid{flex:1;display:grid;grid-template-columns:minmax(0,2.7fr) minmax(0,1fr);gap:clamp(14px,1.6vw,26px);align-items:stretch}
+.dmain{display:flex;flex-direction:column;gap:14px;min-width:0}
+.dstage{position:relative;background:linear-gradient(180deg,var(--ivory),var(--champ));color:var(--ink);border-radius:30px;padding:clamp(18px,3vw,44px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;box-shadow:0 12px 0 rgba(78,7,11,.4),0 28px 60px rgba(0,0,0,.3);min-height:clamp(160px,21vh,260px);padding:clamp(10px,1.4vw,20px)}
+.dstage .btn.xl{min-height:60px;font-size:clamp(20px,1.8vw,26px)}
+.dstage .actions{margin-top:2px}
 .prize-in{font:900 clamp(16px,1.5vw,22px) var(--sans);color:var(--ivory);background:var(--red);border:0;border-radius:999px;padding:8px 20px;text-align:center;width:min(360px,90%)}
 .prize-in:focus{outline:3px solid var(--gold)}
-.dname{font:400 clamp(54px,8vw,140px)/1.02 var(--serif);color:var(--red-d);text-wrap:balance;overflow-wrap:anywhere;min-height:1.1em}
+.dname{font:400 clamp(40px,5vw,92px)/1.02 var(--serif);color:var(--red-d);text-wrap:balance;overflow-wrap:anywhere;min-height:1.1em}
 .dname.spin{color:var(--mute);filter:blur(.5px)}
 .dname.win{animation:pop .5s var(--ease)}
 .dhint{color:var(--mute);font-weight:800}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:5px;padding:10px;border-radius:20px;background:rgba(78,7,11,.35);border:1px solid var(--line)}
+.nm{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;min-height:30px;padding:3px 6px;border-radius:9px;background:rgba(255,253,246,.12);border:1px solid rgba(255,253,246,.18);color:var(--ivory);font-weight:800;font-size:clamp(12px,.9vw,15px);line-height:1.1;transition:background .12s,transform .12s}
+.nm.hot{background:var(--gold);color:var(--ink);border-color:var(--gold-s);transform:scale(1.08);box-shadow:0 0 18px rgba(243,220,138,.8);z-index:1}
+.nm.won{background:var(--ivory);color:var(--red-d);border-color:var(--gold)}
+.nm.won::after{content:attr(data-p);position:absolute;top:-8px;right:6px;font-size:10px;font-weight:900;background:var(--gold);color:var(--ink);padding:1px 6px;border-radius:999px;white-space:nowrap}
+.nm.out{opacity:.35;text-decoration:line-through}
+.nm.land{animation:land .6s var(--ease)}
+@keyframes land{0%{transform:scale(1.5)}100%{transform:scale(1)}}
+@media(max-height:820px){#draw{padding-top:84px;gap:10px}#draw h1{font-size:38px}#draw .sub{display:none}.dstage{min-height:120px;gap:6px}.dname{font-size:clamp(32px,4vw,60px)}.dstage .btn.xl{min-height:50px;font-size:20px}.ngrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:4px;padding:8px}.nm{min-height:26px;font-size:12px}}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;font-weight:800;color:var(--champ)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
 .dside{display:flex;flex-direction:column;gap:12px;padding:clamp(14px,1.6vw,24px);border-radius:26px;background:rgba(78,7,11,.35);border:1px solid var(--line);min-height:0}
 .pool{font-weight:900;font-size:clamp(18px,1.5vw,22px)}
 .pool b{color:var(--gold-s);font-size:1.4em}
@@ -368,6 +382,7 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
     </div>
   </div>
   <div class="dgrid">
+    <div class="dmain">
     <div class="dstage">
       <label class="dhint" for="dPrize" style="margin-bottom:-8px">Drawing for</label>
       <input class="prize-in" id="dPrize" aria-label="Prize being drawn">
@@ -377,6 +392,9 @@ textarea{min-height:300px;resize:vertical;font-size:15px}
         <button class="btn gold xl" style="flex:none" data-go="ddraw" id="dDraw"><svg><use href="#i-gift"/></svg>Draw a winner <kbd>Space</kbd></button>
         <button class="btn ghost" data-go="dabsent" id="dAbsent" hidden>Not here? Draw again</button>
       </div>
+    </div>
+    <div class="ngrid" id="dGrid" aria-label="Everyone in the draw"></div>
+    <div class="legend"><span><i style="background:rgba(255,253,246,.25)"></i>In the draw</span><span><i style="background:#FFFDF6;border:2px solid #D4AF37"></i>Won</span><span><i style="background:rgba(255,253,246,.1)"></i><s>Not here</s></span></div>
     </div>
     <aside class="dside">
       <div class="pool"><b id="dPool">0</b> names in the draw</div>
@@ -786,6 +804,8 @@ const prizeName=k=>['3rd prize','2nd prize','1st prize'][k]||'Bonus prize';
 let DS=false;
 function renderDraw(){
   const pool=dPool();$('dPool').textContent=pool.length;
+  const won=new Map(S.dw.map(w=>[w.n,w.p])),out=new Set(S.dx);
+  $('dGrid').innerHTML=dList().map((n,i)=>`<div class="nm${won.has(n)?' won':out.has(n)?' out':''}" data-k="${i}"${won.has(n)?` data-p="${esc(won.get(n))}"`:''}>${esc(n)}</div>`).join('')||'<p class="note" style="grid-column:1/-1;margin:0">Names appear here after you add them.</p>';
   $('dWins').innerHTML=S.dw.map(w=>`<li><span>${esc(w.p)}</span>${esc(w.n)}</li>`).join('')||'<li class="note" style="font-weight:700">No winners yet</li>';
   if(!DS){$('dPrize').value=prizeName(S.dw.length);
     if(!dList().length){$('dName').textContent='';$('dHint').textContent='Add the names first: click Edit names and paste the list.'}
@@ -799,11 +819,13 @@ function dDraw(){
   DS=true;$('dAbsent').hidden=true;$('dHint').textContent='';renderDraw();
   const el=$('dName');el.classList.remove('win');el.classList.add('spin');
   const total=reduce?0:3200;let t=0,step=50;
-  const roll=()=>{if(t>=total){el.classList.remove('spin');el.textContent=win;void el.offsetWidth;el.classList.add('win');
+  const all=dList(),tiles=$('dGrid').children;
+  const hot=n=>{for(const c of tiles)c.classList.toggle('hot',c.textContent===n)};
+  const roll=()=>{if(t>=total){hot(null);el.classList.remove('spin');el.textContent=win;void el.offsetWidth;el.classList.add('win');
       S.dw.push({n:win,p:prize});save();DS=false;$('dHint').textContent=`${prize} · congratulations!`;$('dAbsent').hidden=false;
       tone(523,.2);setTimeout(()=>tone(659,.2),180);setTimeout(()=>tone(784,.2),360);setTimeout(()=>tone(1047,.5),540);
-      confettiBurst();renderDraw();return}
-    el.textContent=pool[Math.floor(Math.random()*pool.length)];tone(1200,.03,'square',.05);t+=step;step=Math.min(260,step*1.07);setTimeout(roll,step)};
+      confettiBurst();renderDraw();const tile=[...$('dGrid').children].find(c=>c.textContent===win);if(tile){tile.classList.add('land')}return}
+    const pick=pool[Math.floor(Math.random()*pool.length)];el.textContent=pick;hot(pick);tone(1200,.03,'square',.05);t+=step;step=Math.min(260,step*1.07);setTimeout(roll,step)};
   roll();
 }
 function confettiBurst(){if(reduce)return;const c=document.createElement('div');c.className='conf';const cols=['#D4AF37','#F3DC8A','#FFFDF6','#1F7A52'];
@@ -885,7 +907,7 @@ document.addEventListener('click',e=>{
   else if(go==='dundo'){S.dw.pop();save();$('dAbsent').hidden=true;$('dName').textContent='';renderDraw()}
   else if(go==='dreset'){S.dw=[];S.dx=[];save();$('dAbsent').hidden=true;$('dName').textContent='';renderDraw()}
   else if(go==='dnames')dNamesOpen();
-  else if(go==='dsave'){S.dn=$('dNames').value;save();$('dDrawer').hidden=true;renderDraw()}
+  else if(go==='dsave'){S.dn=$('dNames').value;save();$('dDrawer').hidden=true;renderDraw();window.scrollTo(0,0)}
 });
 $('pAbort').dataset.confirm='Click again to cancel (no score saved)';
 document.addEventListener('input',e=>{if(e.target.id==='sWords')count();if(e.target.id==='dNames')dCount()});
